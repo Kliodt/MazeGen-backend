@@ -40,8 +40,8 @@ class GridTest {
     @Test
     void testEmptyAndFilledGrid() {
         // Test all edges for all cells
-        for (int x = 0; x <= emptyGrid.maxCellX(); x++) {
-            for (int y = 0; y <= emptyGrid.maxCellY(); y++) {
+        for (int y = 0; y < emptyGrid.getSizeY(); y++) {
+            for (int x = 0; x < emptyGrid.getSizeX(); x++) {
                 for (Grid.Edge edge : Grid.Edge.values()) {
                     assertFalse(emptyGrid.isCellEdgeActive(x, y, edge));
                     assertTrue(filledGrid.isCellEdgeActive(x, y, edge));
@@ -229,22 +229,22 @@ class GridTest {
         emptyGrid.addBorder();
         
         // Test top border
-        for (int x = 0; x <= emptyGrid.maxCellX(); x++) {
+        for (int x = 0; x < emptyGrid.getSizeX(); x++) {
             assertTrue(emptyGrid.isCellEdgeActive(x, 0, Grid.Edge.TOP));
         }
         
         // Test bottom border
-        for (int x = 0; x <= emptyGrid.maxCellX(); x++) {
+        for (int x = 0; x < emptyGrid.getSizeX(); x++) {
             assertTrue(emptyGrid.isCellEdgeActive(x, emptyGrid.maxCellY(), Grid.Edge.BOTTOM));
         }
         
         // Test left border
-        for (int y = 0; y <= emptyGrid.maxCellY(); y++) {
+        for (int y = 0; y < emptyGrid.getSizeY(); y++) {
             assertTrue(emptyGrid.isCellEdgeActive(0, y, Grid.Edge.LEFT));
         }
         
         // Test right border
-        for (int y = 0; y <= emptyGrid.maxCellY(); y++) {
+        for (int y = 0; y < emptyGrid.getSizeY(); y++) {
             assertTrue(emptyGrid.isCellEdgeActive(emptyGrid.maxCellX(), y, Grid.Edge.RIGHT));
         }
         
@@ -288,40 +288,6 @@ class GridTest {
     }
 
     @Test
-    void testCompactStringRepresentationRoundTrip() {
-        // Create a grid and modify some edges
-        Grid original = emptyGrid;
-        original.activateCellEdges(0, 0, Grid.Edge.TOP, Grid.Edge.RIGHT);
-        original.activateCellEdges(1, 1, Grid.Edge.BOTTOM, Grid.Edge.LEFT);
-        
-        // Get compact representation
-        String[] compact = original.getCompactStringRepresentation();
-        
-        // Create new grid from compact representation
-        Grid reconstructed;
-        try {
-            reconstructed = new Grid(compact);
-        } catch (Exception e) {
-            throw new AssertionError("Grid reconstruction failed", e);
-        }
-        
-        // Verify dimensions match
-        assertEquals(original.getSizeX(), reconstructed.getSizeX());
-        assertEquals(original.getSizeY(), reconstructed.getSizeY());
-        
-        // Verify all edges match
-        for (int x = 0; x <= original.maxCellX(); x++) {
-            for (int y = 0; y <= original.maxCellY(); y++) {
-                for (Grid.Edge edge : Grid.Edge.values()) {
-                    assertEquals(original.isCellEdgeActive(x, y, edge), 
-                               reconstructed.isCellEdgeActive(x, y, edge),
-                               "Edge mismatch at cell (" + x + "," + y + ") edge " + edge);
-                }
-            }
-        }
-    }
-
-    @Test
     void testCompactStringConstructorValidation() {
         // Test that we fail successfully
 
@@ -329,44 +295,21 @@ class GridTest {
         assertThrows(GridFormatException.class, () -> new Grid(null));
         
         // Test empty array
-        assertThrows(GridFormatException.class, () -> new Grid(new String[0]));
+        assertThrows(GridFormatException.class, () -> new Grid(new byte[][]{}));
         
         // Test null row
-        assertThrows(GridFormatException.class, () -> new Grid(new String[]{"101", null, "010"}));
-        
-        // Test invalid characters
-        assertThrows(GridFormatException.class, () -> new Grid(new String[]{"101", "1a1", "010"}));
-        assertThrows(GridFormatException.class, () -> new Grid(new String[]{"101", "121", "010"}));
-        
+        assertThrows(GridFormatException.class, () -> new Grid(new byte[][]{{0, 0, 0}, null, {0, 0, 0}}));
+                
         // Test inconsistent row lengths
-        assertThrows(GridFormatException.class, () -> new Grid(new String[]{"101", "10", "010"}));
+        assertThrows(GridFormatException.class, () -> new Grid(new byte[][]{{0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0}}));
         
         // Test invalid grid structure (even number of rows)
-        assertThrows(GridFormatException.class, () -> new Grid(new String[]{"101", "010"}));
+        assertThrows(GridFormatException.class, () -> new Grid(new byte[][]{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}));
         
         // Test too few rows
-        assertThrows(GridFormatException.class, () -> new Grid(new String[]{"1"}));
-    }
+        assertThrows(GridFormatException.class, () -> new Grid(new byte[][]{{0, 0, 0}, {0, 0, 0}}));
 
-    @Test
-    void testGridCompactRepresentation() {
-        var testGrid = new Grid(3, 2, false);
-        testGrid.activateCellEdges(0, 0, Grid.Edge.TOP, Grid.Edge.BOTTOM, Grid.Edge.LEFT, Grid.Edge.RIGHT);
-        testGrid.activateCellEdges(1, 0, Grid.Edge.TOP, Grid.Edge.BOTTOM, Grid.Edge.LEFT, Grid.Edge.RIGHT);
-        testGrid.activateCellEdges(2, 1, Grid.Edge.TOP, Grid.Edge.BOTTOM, Grid.Edge.LEFT, Grid.Edge.RIGHT);
-
-        var actual = testGrid.getCompactStringRepresentation();
-
-        var expected = new String[] {
-            "1100", 
-            "1110",
-            "1110",
-            "0011",
-            "0010"
-        };
-
-        for (int i = 0; i < expected.length; i++) {
-            assertEquals(expected[i], actual[i]);
-        }
+        // Test too few columns
+        assertThrows(GridFormatException.class, () -> new Grid(new byte[][]{{0}, {0}, {0}}));
     }
 }

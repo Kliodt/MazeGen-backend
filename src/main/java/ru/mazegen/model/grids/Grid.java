@@ -5,6 +5,8 @@ import ru.mazegen.model.exceptions.GridFormatException;
 
 import java.util.*;
 
+import jakarta.annotation.Nonnull;
+
 public class Grid {
 
     /**
@@ -27,90 +29,56 @@ public class Grid {
     private final int sizeY;
 
 
-    private final ArrayList<ArrayList<Boolean>> edges;
+    private final byte[][] edges;
 
 
     public Grid(int sizeX, int sizeY, boolean filledGrid) {
         if (sizeX <= 0 || sizeY <= 0) throw new RuntimeException("Negative grid size");
         this.sizeX = sizeX;
         this.sizeY = sizeY;
-        this.edges = new ArrayList<>();
+        this.edges = new byte[sizeY * 2 + 1][];
         // init edges matrix
-        for (int i = 0; i < sizeY * 2 + 1; i++) {
-            var next = new ArrayList<Boolean>(sizeX * 2 + 1);
-            for (int j = 0; j < sizeX + 1; j++) {
-                next.add(filledGrid);
-            }
-            this.edges.add(next);
+        for (int i = 0; i < this.edges.length; i++) {
+            this.edges[i] = new byte[sizeX + 1];
+            Arrays.fill(this.edges[i], (byte)(filledGrid ? 1 : 0));
         }
     }
 
-    public Grid(String[] compactStringRepresentation) throws GridFormatException {
-        validateCompactRepresentation(compactStringRepresentation);
-        this.edges = parseCompactRepresentation(compactStringRepresentation);
-        validateGridStructure();
+    public Grid(byte[][] edges) throws GridFormatException {
+        if (edges == null) throw new GridFormatException("Grid can't be null");
+        validateGridStructure(edges);
+        this.edges = edges;
         
-        // Calculate grid dimensions from edges matrix
-        this.sizeY = (edges.size() - 1) / 2;
-        this.sizeX = edges.get(0).size() - 1;
+        this.sizeY = (edges.length - 1) / 2;
+        this.sizeX = edges[0].length - 1;
     }
 
-    private void validateCompactRepresentation(String[] compactStringRepresentation) throws GridFormatException{
-        if (compactStringRepresentation == null) {
-            throw new GridFormatException("Compact representation cannot be null");
-        } 
-        if (compactStringRepresentation.length == 0) {
-            throw new GridFormatException("Compact representation cannot be empty");
-        }
-    }
 
-    private ArrayList<ArrayList<Boolean>> parseCompactRepresentation(String[] compactStringRepresentation) throws GridFormatException {
-        var parsedEdges = new ArrayList<ArrayList<Boolean>>();
-        
-        for (int i = 0; i < compactStringRepresentation.length; i++) {
-            String row = compactStringRepresentation[i];
-            if (row == null) {
-                throw new GridFormatException("Row " + i + " in compact representation cannot be null");
-            }
-            
-            var edgeRow = new ArrayList<Boolean>(row.length());
-            for (int j = 0; j < row.length(); j++) {
-                char c = row.charAt(j);
-                if (c == '1') {
-                    edgeRow.add(true);
-                } else if (c == '0') {
-                    edgeRow.add(false);
-                } else {
-                    throw new GridFormatException("Invalid character '" + c + "' at position [" + i + "][" + j + "]. Only '0' and '1' are allowed");
-                }
-            }
-            parsedEdges.add(edgeRow);
+    private void validateGridStructure(@Nonnull byte[][] edges) throws GridFormatException {
+        if (edges.length < 3 || edges.length % 2 == 0) {
+            throw new GridFormatException("Invalid grid structure: edges matrix must have odd number of rows >= 3, but actual is " + edges.length);
         }
-        
-        return parsedEdges;
-    }
 
-    private void validateGridStructure() throws GridFormatException {
-        if (edges.size() < 3 || edges.size() % 2 == 0) {
-            throw new GridFormatException("Invalid grid structure: edges matrix must have odd number of rows >= 3");
-        }
-        
-        // Check that all rows have the same length
-        int expectedRowLength = edges.get(0).size();
-        for (int i = 1; i < edges.size(); i++) {
-            if (edges.get(i).size() != expectedRowLength) {
-                throw new GridFormatException("Inconsistent row lengths: row 0 has " + expectedRowLength + " elements, but row " + i + " has " + edges.get(i).size() + " elements");
+        // Check nulls
+        for (int i = 1; i < edges.length; i++) {
+            if (edges[i] == null) {
+                throw new GridFormatException("Grid row can't be null: row " + i + " is null");
             }
         }
         
-        // Validate calculated dimensions
-        int calculatedSizeY = (edges.size() - 1) / 2;
-        int calculatedSizeX = expectedRowLength - 1;
-        
-        if (calculatedSizeX <= 0 || calculatedSizeY <= 0) {
-            throw new GridFormatException("Invalid grid dimensions calculated: sizeX=" + calculatedSizeX + ", sizeY=" + calculatedSizeY);
+        // Check that all rows have the same length >= 2
+        int expectedRowLength = edges[0].length;
+        for (int i = 1; i < edges.length; i++) {
+            if (edges[i].length != expectedRowLength) {
+                throw new GridFormatException("Inconsistent row lengths: row 0 has " + expectedRowLength + " elements, but row " + i + " has " + edges[i].length + " elements");
+            }
+        }
+
+        if (expectedRowLength < 2) {
+            throw new GridFormatException("Invalid grid structure: matrix must have number of columns >= 2, but actual is " + expectedRowLength);
         }
     }
+        
 
 
     public final int maxCellX() {
@@ -123,22 +91,24 @@ public class Grid {
 
 
     private void setCellEdge(int cellX, int cellY, Edge edge, boolean value) {
+        var val = (byte) (value ? 1 : 0);
         switch (edge) {
-            case TOP -> edges.get(cellY * 2).set(cellX, value);
-            case BOTTOM -> edges.get(cellY * 2 + 2).set(cellX, value);
-            case LEFT -> edges.get(cellY * 2 + 1).set(cellX, value);
-            case RIGHT -> edges.get(cellY * 2 + 1).set(cellX + 1, value);
+            case TOP    -> edges[cellY * 2]    [cellX]     = val;
+            case BOTTOM -> edges[cellY * 2 + 2][cellX]     = val;
+            case LEFT   -> edges[cellY * 2 + 1][cellX]     = val;
+            case RIGHT  -> edges[cellY * 2 + 1][cellX + 1] = val;
         }
     }
 
 
     private boolean getCellEdge(int cellX, int cellY, Edge edge) {
-        return switch (edge) {
-            case TOP -> edges.get(cellY * 2).get(cellX);
-            case BOTTOM -> edges.get(cellY * 2 + 2).get(cellX);
-            case LEFT -> edges.get(cellY * 2 + 1).get(cellX);
-            case RIGHT -> edges.get(cellY * 2 + 1).get(cellX + 1);
+        var val = switch (edge) {
+            case TOP    -> edges[cellY * 2]    [cellX];
+            case BOTTOM -> edges[cellY * 2 + 2][cellX];
+            case LEFT   -> edges[cellY * 2 + 1][cellX];
+            case RIGHT  -> edges[cellY * 2 + 1][cellX + 1];
         };
+        return val != 0;
     }
 
 
@@ -206,22 +176,5 @@ public class Grid {
             setCellEdge(0, y, Edge.LEFT, true);
             setCellEdge(sizeX - 1, y, Edge.RIGHT, true);
         }
-    }
-
-    
-    /**
-     * Space-efficient grid representation used to store and transfer the grid
-     */
-    public String[] getCompactStringRepresentation() {
-        var ret = new String[edges.size()];
-        for (int i = 0; i < edges.size(); i++) {
-            var row = edges.get(i);
-            var bytes = new char[row.size()];
-            for (int j = 0; j < row.size(); j++) {
-                bytes[j] = row.get(j) ? '1' : '0';
-            }
-            ret[i] = new String(bytes);
-        }
-        return ret;
     }
 }
