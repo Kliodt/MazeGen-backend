@@ -1,0 +1,59 @@
+type Query {
+    getMazeById(id: ID!): Maze
+}
+
+type Mutation {
+    generateMaze(
+        parameters: MazeGenerator!,
+        userId: ID
+    ): Maze
+
+    "Return if submission accepted/declined"
+    submitMazeCompletion(
+        mazeId: ID!,
+        userId: ID!,
+        path: [Point!]!,
+    ): Boolean
+}
+
+# -------------- input types --------------
+
+input MazeGenerator {
+    width: Int!
+    height: Int!
+    algorithm: String!
+    startX: Int
+    startY: Int
+    finishX: Int
+    finishY: Int
+
+    # other parameters
+}
+
+input Point {
+    x: Int!
+    y: Int!
+}
+
+# -------------- output types --------------
+
+type Maze {
+    id: ID!
+    grid: [[Int!]!]!
+    startX: Int!
+    startY: Int!
+    finishX: Int!
+    finishY: Int!
+
+    author: User
+    algorithm: String
+    genDate: String
+    genDurationMs: Int
+}
+
+type User {
+    id: ID!
+    nickname: String!
+    registrationDate: String # todo: method to dump this
+    mazes: [Maze]
+}

@@ -1,10 +1,11 @@
-package ru.mazegen.model.generators;
+package ru.mazegen.mazeGenAlgorithms;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 import lombok.NonNull;
 import ru.mazegen.model.Maze;
+import ru.mazegen.model.MazeGenerator;
 import ru.mazegen.model.grids.Grid;
 import ru.mazegen.model.grids.Grid.Edge;
 
@@ -13,14 +14,14 @@ import ru.mazegen.model.grids.Grid.Edge;
  * Generates completely random maze. Maybe impossible. This generator exists only 
  * for testing purposes (and fuzzy testing in the future)
  */
-public class RandomMazeGenerator implements MazeGenerator {
-    private Random random = new Random();
+public class RandomMazeGenAlgorithm implements MazeGenAlgorithm {
+    private final Random random = new Random();
 
     @Override
     @NonNull
-    public Maze generateMaze(@NonNull MazeGeneratorParameters par) {
-        Grid grid = new Grid(par.width, par.height, false);
-        Maze maze = new Maze(grid, par.startX, par.startY, par.finishX, par.finishY);
+    public Maze generateMaze(@NonNull MazeGenerator par) {
+        Grid grid = new Grid(par.getWidth(), par.getHeight(), false);
+        Maze maze = new Maze(grid, par.getStartX(), par.getStartY(), par.getFinishX(), par.getFinishY());
 
         for (int y = 0; y < grid.getSizeY(); y++) {
             for (int x = 0; x < grid.getSizeX(); x++) {

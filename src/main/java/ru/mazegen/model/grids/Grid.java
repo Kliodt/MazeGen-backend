@@ -1,7 +1,6 @@
 package ru.mazegen.model.grids;
 
 import lombok.Getter;
-import ru.mazegen.model.exceptions.GridFormatException;
 
 import java.util.*;
 
@@ -29,6 +28,10 @@ public class Grid {
     private final int sizeY;
 
 
+    /**
+     * Matrix representing the maze edges
+     */
+    @Getter
     private final byte[][] edges;
 
 

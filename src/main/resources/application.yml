@@ -1,3 +1,7 @@
 spring:
   application:
     name: MazeGen
+
+  graphql:
+    graphiql:
+      enabled: true
