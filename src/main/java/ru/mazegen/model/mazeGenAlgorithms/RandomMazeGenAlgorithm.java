@@ -1,4 +1,4 @@
-package ru.mazegen.mazeGenAlgorithms;
+package ru.mazegen.model.mazeGenAlgorithms;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -41,5 +41,12 @@ public class RandomMazeGenAlgorithm implements MazeGenAlgorithm {
         grid.addBorder();
 
         return maze;
+    }
+
+
+    @Override
+    @NonNull
+    public String getFullAlgorithmName() {
+        return "Random noise";
     }
 }

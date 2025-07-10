@@ -1,14 +1,32 @@
 package ru.mazegen.model;
 
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CompositeType;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@Entity
 public final class User {
 
-    public long id;
-    public String nickname;
-    public LocalDateTime registrationDate;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
-    public List<Maze> mazes;
+    private String nickname;
+    private String passwordHash;
+    private LocalDateTime registrationDate;
+
+    @OneToMany(
+            orphanRemoval = true,
+            cascade = {CascadeType.ALL},
+            fetch = FetchType.LAZY
+    )
+    private List<MazePath> mazePaths;
+
 
 }

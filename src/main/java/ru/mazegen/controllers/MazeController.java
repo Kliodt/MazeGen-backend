@@ -1,43 +1,63 @@
 package ru.mazegen.controllers;
 
+import graphql.schema.DataFetchingEnvironment;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import ru.mazegen.model.MazeGenerator;
 import ru.mazegen.model.Maze;
-import ru.mazegen.model.grids.Grid;
-
+import ru.mazegen.repository.MazeRepository;
+import ru.mazegen.controllers.Error.Code;
 import java.time.format.DateTimeFormatter;
 
+
 @Controller
+@RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:3000"})
 public class MazeController {
+
+    final MazeRepository mazeRepository;
+
     @QueryMapping
-    public Maze getMazeById(@Argument String id) {
-        var ret = new Maze(new Grid(3, 3, true), 0, 0, 3, 3);
-//        ret.genDate = new Date();
-        ret.algorithm = id;
-        ret.genDurationMs = 123456;
-//        ret.id = ;
-        return ret;
+    public Object getMazeById(@Argument @NonNull String id) {
+        try {
+            var ret = mazeRepository.findById(Long.parseLong(id));
+            if (ret.isPresent()) {
+                return ret;
+            }
+            return new Error(Code.NOT_EXISTS, "Maze id '" + id + "' not exists!");
+        } catch (NumberFormatException e) {
+            return new Error(Code.BAD_FORMAT, "Id must be integer!");
+        }
     }
 
+
     @MutationMapping
-    public Maze generateMaze(@Argument MazeGenerator parameters, @Argument String userId) {
-        var ret = new Maze(new Grid(3, 3, true), 0, 0, 3, 3);
-        ret.id = parameters.getStartX();
-        ret.algorithm = userId;
+    public Object generateMaze(@Argument @NonNull MazeGenerator parameters, @Argument String userId) {
+        var ret = parameters.generate();
+        if (ret == null) {
+            return new Error(Code.INVALID_PARAMETERS, "Invalid parameters! " +
+                    "Check that 'algorithmKeyStr' is an existing key!");
+        }
+        if (userId != null) {
+            mazeRepository.save(ret);
+            // todo: save user id with maze
+        }
         return ret;
     }
 
     @SchemaMapping(typeName = "Maze", field = "genDate")
     public String creationDateAsString(Maze maze) {
-        return DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss").format(maze.genDate);
+        return DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss").format(maze.getGenDate());
     }
 
     @SchemaMapping(typeName = "Maze", field = "grid")
     public byte[][] resolveGridField(Maze maze) {
-        return maze.grid.getEdges();
+        return maze.getGrid().getEdges();
     }
 }

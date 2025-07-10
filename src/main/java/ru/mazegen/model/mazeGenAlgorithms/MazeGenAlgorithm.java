@@ -1,4 +1,4 @@
-package ru.mazegen.mazeGenAlgorithms;
+package ru.mazegen.model.mazeGenAlgorithms;
 
 import lombok.NonNull;
 import ru.mazegen.model.Maze;
@@ -11,4 +11,7 @@ public interface MazeGenAlgorithm {
      */
     @NonNull
     Maze generateMaze(@NonNull MazeGenerator par);
+
+    @NonNull
+    String getFullAlgorithmName();
 }

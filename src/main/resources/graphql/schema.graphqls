@@ -1,12 +1,12 @@
 type Query {
-    getMazeById(id: ID!): Maze
+    getMazeById(id: ID!): MazeOrError
 }
 
 type Mutation {
     generateMaze(
         parameters: MazeGenerator!,
         userId: ID
-    ): Maze
+    ): MazeOrError
 
     "Return if submission accepted/declined"
     submitMazeCompletion(
@@ -21,7 +21,7 @@ type Mutation {
 input MazeGenerator {
     width: Int!
     height: Int!
-    algorithm: String!
+    algorithmKeyStr: String!
     startX: Int
     startY: Int
     finishX: Int
@@ -57,3 +57,10 @@ type User {
     registrationDate: String # todo: method to dump this
     mazes: [Maze]
 }
+
+# -------------- error types --------------
+
+type Error {code: Int! description: String!}
+
+union MazeOrError = Maze | Error
+union UserOrError = User | Error

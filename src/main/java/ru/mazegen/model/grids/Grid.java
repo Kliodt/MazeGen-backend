@@ -1,11 +1,17 @@
 package ru.mazegen.model.grids;
 
+import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.*;
 
 import jakarta.annotation.Nonnull;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@Entity
 public class Grid {
 
     /**
@@ -15,30 +21,16 @@ public class Grid {
         TOP, BOTTOM, RIGHT, LEFT
     }
 
-    /**
-     * Aka grid width
-     */
-    @Getter
-    private final int sizeX;
+    @Id
+    @GeneratedValue
+    private long id;
 
-    /**
-     * Aka grid height
-     */
-    @Getter
-    private final int sizeY;
-
-
-    /**
-     * Matrix representing the maze edges
-     */
-    @Getter
-    private final byte[][] edges;
+    @Embedded
+    private byte[][] edges; // Matrix representing the maze edges
 
 
     public Grid(int sizeX, int sizeY, boolean filledGrid) {
         if (sizeX <= 0 || sizeY <= 0) throw new RuntimeException("Negative grid size");
-        this.sizeX = sizeX;
-        this.sizeY = sizeY;
         this.edges = new byte[sizeY * 2 + 1][];
         // init edges matrix
         for (int i = 0; i < this.edges.length; i++) {
@@ -51,9 +43,6 @@ public class Grid {
         if (edges == null) throw new GridFormatException("Grid can't be null");
         validateGridStructure(edges);
         this.edges = edges;
-        
-        this.sizeY = (edges.length - 1) / 2;
-        this.sizeX = edges[0].length - 1;
     }
 
 
@@ -83,13 +72,20 @@ public class Grid {
     }
         
 
+    public final int getSizeX() {
+        return edges.length > 0 ? edges[0].length - 1: 0;
+    }
+
+    public final int getSizeY() {
+        return (edges.length - 1) / 2;
+    }
 
     public final int maxCellX() {
-        return sizeX - 1;
+        return getSizeX() - 1;
     }
 
     public final int maxCellY() {
-        return sizeY - 1;
+        return getSizeY() - 1;
     }
 
 
@@ -171,13 +167,13 @@ public class Grid {
      * Add border to the grid
      */
     public void addBorder() {
-        for (int x = 0; x < sizeX; x++) {
+        for (int x = 0; x < getSizeX(); x++) {
             setCellEdge(x, 0, Edge.TOP, true);
-            setCellEdge(x, sizeY - 1, Edge.BOTTOM, true);
+            setCellEdge(x, getSizeY() - 1, Edge.BOTTOM, true);
         }
-        for (int y = 0; y < sizeY; y++) {
+        for (int y = 0; y < getSizeY(); y++) {
             setCellEdge(0, y, Edge.LEFT, true);
-            setCellEdge(sizeX - 1, y, Edge.RIGHT, true);
+            setCellEdge(getSizeX() - 1, y, Edge.RIGHT, true);
         }
     }
 }

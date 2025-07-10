@@ -1,10 +1,11 @@
 package ru.mazegen.model;
 
 import lombok.*;
-import ru.mazegen.mazeGenAlgorithms.EmptyMazeGenAlgorithm;
-import ru.mazegen.mazeGenAlgorithms.MazeGenAlgorithm;
-import ru.mazegen.mazeGenAlgorithms.RandomMazeGenAlgorithm;
+import ru.mazegen.model.mazeGenAlgorithms.EmptyMazeGenAlgorithm;
+import ru.mazegen.model.mazeGenAlgorithms.MazeGenAlgorithm;
+import ru.mazegen.model.mazeGenAlgorithms.RandomMazeGenAlgorithm;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -17,7 +18,7 @@ import java.util.*;
 public final class MazeGenerator {
     private int width;
     private int height;
-    private String algorithm;
+    private String algorithmKeyStr;
 
     private int startX;
     private int startY;
@@ -39,12 +40,12 @@ public final class MazeGenerator {
 
     // make fields valid where possible and return true, return false otherwise
     private boolean validateFields() {
-        if (algorithm == null) return false;
+        if (algorithmKeyStr == null) return false;
 
         width = clamp(width, 3, 1000);
         height = clamp(height, 3, 1000);
 
-        algorithm = algorithm.toLowerCase();
+        algorithmKeyStr = algorithmKeyStr.toLowerCase();
 
         startX = clamp(startX, 0, width - 1);
         startY = clamp(startY, 0, height - 1);
@@ -62,18 +63,30 @@ public final class MazeGenerator {
     }
 
 
-    public Maze generateMaze() {
+    public Maze generate() {
         if (!validateFields()) {
             return null;
         }
 
-        var generator = generators.get(algorithm);
+        var generator = generators.get(algorithmKeyStr);
 
         if (generator == null) {
             return null;
         }
 
-        return generator.generateMaze(this);
+        long startTime = System.currentTimeMillis();
+
+        var maze = generator.generateMaze(this);
+
+        long endTime = System.currentTimeMillis();
+
+        maze.setMetaInformation(
+                generator.getFullAlgorithmName(),
+                LocalDateTime.now(),
+                (int) (endTime - startTime)
+        );
+
+        return maze;
     }
 
 }

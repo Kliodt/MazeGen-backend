@@ -1,4 +1,4 @@
-package ru.mazegen.mazeGenAlgorithms;
+package ru.mazegen.model.mazeGenAlgorithms;
 
 import lombok.NonNull;
 import ru.mazegen.model.Maze;
@@ -17,5 +17,11 @@ public class EmptyMazeGenAlgorithm implements MazeGenAlgorithm {
         grid.addBorder();
 
         return maze;
+    }
+
+    @Override
+    @NonNull
+    public String getFullAlgorithmName() {
+        return "Empty";
     }
 }
