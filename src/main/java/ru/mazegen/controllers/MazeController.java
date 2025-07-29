@@ -13,6 +13,8 @@ import ru.mazegen.model.MazeGenerator;
 import ru.mazegen.model.Maze;
 import ru.mazegen.repository.MazeRepository;
 import ru.mazegen.controllers.Error.Code;
+import ru.mazegen.services.MazeService;
+
 import java.time.format.DateTimeFormatter;
 
 
@@ -21,13 +23,13 @@ import java.time.format.DateTimeFormatter;
 @CrossOrigin(origins = {"http://localhost:3000"})
 public class MazeController {
 
-    final MazeRepository mazeRepository;
+    private final MazeService mazeService;
 
     @QueryMapping
     public Object getMazeById(@Argument @NonNull String id) {
         try {
-            var ret = mazeRepository.findById(Long.parseLong(id));
-            if (ret.isPresent()) {
+            var ret = mazeService.getMazeById(Long.parseLong(id));
+            if (ret != null) {
                 return ret;
             }
             return new Error(Code.NOT_EXISTS, "Maze id '" + id + "' not exists!");
@@ -45,11 +47,13 @@ public class MazeController {
                     "Check that 'algorithmKeyStr' is an existing key!");
         }
         if (userId != null) {
-            mazeRepository.save(ret);
+//            mazeRepository.save(ret);
             // todo: save user id with maze
         }
         return ret;
     }
+
+    // ---------------------- converters ----------------------
 
     @SchemaMapping(typeName = "Maze", field = "genDate")
     public String creationDateAsString(Maze maze) {

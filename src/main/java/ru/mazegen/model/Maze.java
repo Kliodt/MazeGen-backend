@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(indexes = {
         // optimize search by author (including user's own mazes)
-        @Index(name = "maze_author_index", columnList = "author")
+        @Index(name = "maze_author_index", columnList = "author_id")
 })
 public class Maze {
 
@@ -25,7 +25,7 @@ public class Maze {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
             fetch = FetchType.LAZY
     )
-    @JoinColumn(name = "grid_id", referencedColumnName = "id")
+    @JoinColumn(name = "grid_id", referencedColumnName = "id", nullable = false)
     private Grid grid;
 
 
@@ -33,14 +33,22 @@ public class Maze {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             fetch = FetchType.EAGER
     )
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
     private User author;
 
 
+    @Column(nullable = false)
     private int startX;
+
+    @Column(nullable = false)
     private int startY;
+
+    @Column(nullable = false)
     private int finishX;
+
+    @Column(nullable = false)
     private int finishY;
+
     private String algorithm;
     private LocalDateTime genDate;
     private int genDurationMs;

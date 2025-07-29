@@ -25,7 +25,8 @@ public class Grid {
     @GeneratedValue
     private long id;
 
-    @Embedded
+    @Lob
+    @Column(nullable = false)
     private byte[][] edges; // Matrix representing the maze edges
 
 
@@ -38,6 +39,7 @@ public class Grid {
             Arrays.fill(this.edges[i], (byte)(filledGrid ? 1 : 0));
         }
     }
+
 
     public Grid(byte[][] edges) throws GridFormatException {
         if (edges == null) throw new GridFormatException("Grid can't be null");

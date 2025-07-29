@@ -1,7 +1,6 @@
 package ru.mazegen.controllers;
 
 import lombok.Data;
-import lombok.Getter;
 
 /**
  * Helper class to be able to return verbose errors with GraphQL

@@ -4,9 +4,13 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import ru.mazegen.model.Maze;
 
+import java.util.List;
+
 @Repository
 public interface MazeRepository extends CrudRepository<Maze, Long> {
 
-//    Maze findById(long id);
+    List<Maze> findAllByAuthorId(long authorId);
+
+
 
 }
