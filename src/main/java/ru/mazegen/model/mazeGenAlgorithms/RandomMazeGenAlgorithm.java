@@ -3,7 +3,7 @@ package ru.mazegen.model.mazeGenAlgorithms;
 import java.util.ArrayList;
 import java.util.Random;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 import ru.mazegen.model.Maze;
 import ru.mazegen.model.MazeGenerator;
 import ru.mazegen.model.grids.Grid;
@@ -15,11 +15,11 @@ import ru.mazegen.model.grids.Grid.Edge;
  * for testing purposes (and fuzzy testing in the future)
  */
 public class RandomMazeGenAlgorithm implements MazeGenAlgorithm {
-    private final Random random = new Random();
+    private static final Random random = new Random();
 
     @Override
-    @NonNull
-    public Maze generateMaze(@NonNull MazeGenerator par) {
+    @NotNull
+    public Maze generateMaze(@NotNull MazeGenerator par) {
         Grid grid = new Grid(par.getWidth(), par.getHeight(), false);
         Maze maze = new Maze(grid, par.getStartX(), par.getStartY(), par.getFinishX(), par.getFinishY());
 
@@ -45,7 +45,7 @@ public class RandomMazeGenAlgorithm implements MazeGenAlgorithm {
 
 
     @Override
-    @NonNull
+    @NotNull
     public String getFullAlgorithmName() {
         return "Random noise";
     }

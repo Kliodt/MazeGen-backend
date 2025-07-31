@@ -1,9 +1,9 @@
 package ru.mazegen.services;
 
 import jakarta.transaction.Transactional;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import ru.mazegen.model.User;
 import ru.mazegen.repository.UserRepository;
@@ -20,7 +20,8 @@ public class UserService {
 
 
     /**
-     * Replace user's refresh token
+     * Replaces user's refresh token with another one.
+     * If oldToken not exists, or user not exists, nothing happens and method returns false
      * @return true, on success, false if something went wrong
      */
     @Transactional
@@ -47,16 +48,15 @@ public class UserService {
             return;
         }
         user.getRefreshTokens().add(token);
-        userRepo.save(user); // save changes
     }
 
 
     /**
      * Basically, a way to remove expired tokens (but without explicit jwtService dependency)
-     * @param filter predicate that returns true if token should be removed
+     * @param filter predicate that determines if token should be retained
      */
     @Transactional
-    public void clearRefreshTokensWithFilter(Predicate<String> filter, long userId) {
+    public void filterUserRefreshTokens(Predicate<String> filter, long userId) {
         var user = userRepo.findById(userId).orElse(null);
         if (user == null) {
             log.warn("Tried to clear refresh tokens for non existent user {}", userId);

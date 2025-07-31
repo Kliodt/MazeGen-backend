@@ -1,17 +1,11 @@
 package ru.mazegen.security;
 
-import com.nimbusds.jose.shaded.gson.Gson;
-import com.nimbusds.jose.shaded.gson.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.*;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,21 +13,17 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ru.mazegen.model.User;
 import ru.mazegen.services.JWTService;
 import ru.mazegen.services.UserService;
-
 import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
     private UserService userService;
@@ -104,21 +94,30 @@ public class SecurityConfig {
 
         JWTUserInfo userInfo = JWTUserInfo.fromUser(user);
 
-        var refreshToken = jwtService.generateToken(userInfo, true);
-        var accessToken = jwtService.generateToken(userInfo, false);
+        var refreshToken = jwtService.createRefreshToken(userInfo);
+        var accessToken = jwtService.createAccessToken(userInfo);
 
         userService.addRefreshTokenForUser(refreshToken, userInfo.getUserId());
 
-        jwtService.setToken(response, refreshToken, true);
-        jwtService.setToken(response, accessToken, false);
+        jwtService.setRefreshToken(response, refreshToken);
+        jwtService.setAccessToken(response, accessToken);
 
         // clear expired and most likely dangling tokens
-        userService.clearRefreshTokensWithFilter(token -> {
-            var parseResult = jwtService.parseToken(token);
-            return parseResult.isExpired() || parseResult.jwtUserInfo() == null;
-        }, userInfo.getUserId());
+        userService.filterUserRefreshTokens(
+                token -> !jwtService.parseToken(token).isExpired(),
+                userInfo.getUserId()
+        );
 
 
-        response.sendRedirect("/");
+        response.sendRedirect("http://localhost:3000/"); // todo
+
+//        var headerNames = request.getHeaderNames();
+//        while (headerNames.hasMoreElements()) {
+//            String headerName = headerNames.nextElement();
+//            log.info("request header {} --- {}", headerName, request.getHeader(headerName));
+//
+//        }
+
+        // todo: deal with google's session id
     }
 }

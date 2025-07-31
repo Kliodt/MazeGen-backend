@@ -1,6 +1,6 @@
 package ru.mazegen.model.mazeGenAlgorithms;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 import ru.mazegen.model.Maze;
 import ru.mazegen.model.MazeGenerator;
 
@@ -9,9 +9,9 @@ public interface MazeGenAlgorithm {
     /**
      * Create a new maze on a grid
      */
-    @NonNull
-    Maze generateMaze(@NonNull MazeGenerator par);
+    @NotNull
+    Maze generateMaze(@NotNull MazeGenerator generator);
 
-    @NonNull
+    @NotNull
     String getFullAlgorithmName();
 }

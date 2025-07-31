@@ -1,8 +1,8 @@
 package ru.mazegen.controllers;
 
 import graphql.schema.DataFetchingEnvironment;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import ru.mazegen.model.MazeGenerator;
 import ru.mazegen.model.Maze;
-import ru.mazegen.repository.MazeRepository;
 import ru.mazegen.controllers.Error.Code;
 import ru.mazegen.services.MazeService;
 
@@ -26,7 +25,7 @@ public class MazeController {
     private final MazeService mazeService;
 
     @QueryMapping
-    public Object getMazeById(@Argument @NonNull String id) {
+    public Object getMazeById(@Argument @NotNull String id) {
         try {
             var ret = mazeService.getMazeById(Long.parseLong(id));
             if (ret != null) {
@@ -40,7 +39,7 @@ public class MazeController {
 
 
     @MutationMapping
-    public Object generateMaze(@Argument @NonNull MazeGenerator parameters, @Argument String userId) {
+    public Object generateMaze(@Argument @NotNull MazeGenerator parameters, @Argument String userId) {
         var ret = parameters.generate();
         if (ret == null) {
             return new Error(Code.INVALID_PARAMETERS, "Invalid parameters! " +

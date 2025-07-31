@@ -3,7 +3,8 @@ package ru.mazegen.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CompositeType;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,32 +24,29 @@ public final class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true, nullable = false)
-    private String googleId; // auth with Google
-
-    @ElementCollection(fetch = FetchType.LAZY)
-    private List<String> refreshTokens = new ArrayList<>();
+    @Column(unique = true)
+    private @Nullable String googleId; // auth with Google
 
     @Column(nullable = false)
-    private String nickname;
+    @ElementCollection(fetch = FetchType.LAZY)
+    private @NotNull List<@NotNull String> refreshTokens = new ArrayList<>();
 
-    private String profilePictureUrl;
+    @Column(nullable = false)
+    private @NotNull String nickname;
 
-    private LocalDateTime registrationDate;
+    private @Nullable String profilePictureUrl;
+    private @Nullable LocalDateTime registrationDate;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER;
+    private @NotNull Role role = Role.USER;
 
-    @OneToMany(
-            orphanRemoval = true,
-            cascade = {CascadeType.ALL},
-            fetch = FetchType.LAZY
-    )
-    private List<MazePath> mazePaths = new ArrayList<>();
+    @Column(nullable = false)
+    @ElementCollection(fetch = FetchType.LAZY)
+    private @NotNull List<@NotNull MazePath> mazePaths = new ArrayList<>();
 
 
-    public User(String googleId, String profilePictureUrl, String nickname,
+    public User(String googleId, String profilePictureUrl, @NotNull String nickname,
                 LocalDateTime registrationDate) {
         this.googleId = googleId;
         this.profilePictureUrl = profilePictureUrl;

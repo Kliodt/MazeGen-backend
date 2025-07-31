@@ -1,20 +1,22 @@
 package ru.mazegen.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.RequiredTypeException;
-import lombok.*;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.RequestScope;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import ru.mazegen.model.User;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class that represents information about user stored in JWT
  */
 @Data
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 public class JWTUserInfo {
 
     private final long userId;
@@ -26,22 +28,24 @@ public class JWTUserInfo {
         return new JWTUserInfo(user.getId(), user.getRole(), user.getNickname());
     }
 
-    public HashMap<String, String> getClaims() {
-        var claims = new HashMap<String, String>();
-        claims.put("user_id", Long.toString(userId));
-        claims.put("role", role.toString());
-        claims.put("nickname", nickname);
-        return claims;
+    public Map<String, String> getClaims() {
+        return Map.of(
+                "user_id", Long.toString(userId),
+                "role", role.toString(),
+                "nickname", nickname
+        );
     }
 
     public static JWTUserInfo fromClaims(@NonNull Claims claims) {
         try {
-            Long userId = claims.get("user_id", Long.class);
+            long userId = Long.parseLong(claims.get("user_id", String.class));
             User.Role role = User.Role.valueOf(claims.get("role", String.class));
             String nickname = claims.get("nickname", String.class);
-            if (userId == null || nickname == null) return null;
+
             return new JWTUserInfo(userId, role, nickname);
-        } catch (RequiredTypeException | IllegalArgumentException e) {
+
+        } catch (Exception e) {
+            log.warn("JWTUserInfo couldn't be created from claims: {}", claims, e);
             return null;
         }
     }

@@ -1,8 +1,10 @@
 package ru.mazegen.controllers;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,7 @@ import ru.mazegen.services.UserService;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
     private JWTService jwtService;
@@ -26,33 +29,40 @@ public class AuthController {
      */
     @PostMapping("/token")
     public void updateTokens(HttpServletRequest request, HttpServletResponse response) {
-        var oldRefreshToken = jwtService.getToken(request, true);
+
+        var oldRefreshToken = jwtService.getRefreshToken(request);
+
+        // check that refresh token is present
         if (oldRefreshToken == null) {
+            log.info("null refresh token");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        // check that refresh token is valid and not expired
         var parseResult = jwtService.parseToken(oldRefreshToken);
-        if (parseResult.isExpired() || parseResult.jwtUserInfo() == null) {
+
+        // check that refresh token is valid and not expired
+        if (parseResult.isExpired() || !parseResult.isValid()) {
+            log.info("expired or invalid refresh token");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         JWTUserInfo userInfo = parseResult.jwtUserInfo();
-        var newRefreshToken = jwtService.generateToken(userInfo, true);
+        var newRefreshToken = jwtService.createRefreshToken(userInfo);
 
         // check that this token wasn't used before
         if (!userService.replaceRefreshTokenForUser(oldRefreshToken, newRefreshToken, userInfo.getUserId())) {
+            log.info("token reused: {}", oldRefreshToken);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         // give the user new tokens
-        var newAccessToken = jwtService.generateToken(userInfo, false);
+        var newAccessToken = jwtService.createAccessToken(userInfo);
 
-        jwtService.setToken(response, newAccessToken, false);
-        jwtService.setToken(response, newRefreshToken, true);
+        jwtService.setAccessToken(response, newAccessToken);
+        jwtService.setRefreshToken(response, newRefreshToken);
     }
 
 
@@ -61,3 +71,6 @@ public class AuthController {
         return "user: " + userInfo;
     }
 }
+
+
+

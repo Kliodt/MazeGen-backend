@@ -1,6 +1,7 @@
 package ru.mazegen.model.mazeGenAlgorithms;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.mazegen.model.Maze;
 import ru.mazegen.model.MazeGenerator;
 import ru.mazegen.model.grids.Grid;
@@ -9,10 +10,10 @@ import ru.mazegen.model.grids.Grid;
 public class EmptyMazeGenAlgorithm implements MazeGenAlgorithm {
 
     @Override
-    @NonNull
-    public Maze generateMaze(@NonNull MazeGenerator par) {
-        Grid grid = new Grid(par.getWidth(), par.getHeight(), false);
-        Maze maze = new Maze(grid, par.getStartX(), par.getStartY(), par.getFinishX(), par.getFinishY());
+    @NotNull
+    public Maze generateMaze(@NotNull MazeGenerator generator) {
+        Grid grid = new Grid(generator.getWidth(), generator.getHeight(), false);
+        Maze maze = new Maze(grid, generator.getStartX(), generator.getStartY(), generator.getFinishX(), generator.getFinishY());
 
         grid.addBorder();
 
@@ -20,7 +21,7 @@ public class EmptyMazeGenAlgorithm implements MazeGenAlgorithm {
     }
 
     @Override
-    @NonNull
+    @NotNull
     public String getFullAlgorithmName() {
         return "Empty";
     }

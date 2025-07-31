@@ -4,8 +4,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.io.IOException;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JWTService jwtService;
@@ -35,19 +37,28 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String accessToken = jwtService.getToken(request, false);
-        JwtAuthenticationImpl auth = null;
+        String accessToken = jwtService.getAccessToken(request);
+        JwtAuthenticationImpl auth;
 
-        if (accessToken != null) {
+        if (accessToken == null) {
+            auth = new JwtAuthenticationImpl(null, false);
+
+        } else {
             var parseResult = jwtService.parseToken(accessToken);
 
-            if (parseResult.isExpired() || parseResult.jwtUserInfo() == null)
+            if (!parseResult.isValid()) {
+                auth = new JwtAuthenticationImpl(null, false);
+                log.warn("Request form user with invalid token {}", accessToken);
+            } else if (parseResult.isExpired()) {
+                auth = new JwtAuthenticationImpl(parseResult.jwtUserInfo(), false);
+            } else {
                 auth = new JwtAuthenticationImpl(parseResult.jwtUserInfo(), true);
+            }
         }
 
-        if (auth == null) auth = new JwtAuthenticationImpl(null, false);
-
         SecurityContextHolder.getContext().setAuthentication(auth);
+
+        log.info("Request form user: {}", auth.getPrincipal());
 
         filterChain.doFilter(request, response);
     }

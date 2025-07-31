@@ -6,12 +6,12 @@ import lombok.Getter;
 
 import java.util.*;
 
-import jakarta.annotation.Nonnull;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @Data
 @NoArgsConstructor
-@Entity
+@Embeddable
 public class Grid {
 
     /**
@@ -21,9 +21,9 @@ public class Grid {
         TOP, BOTTOM, RIGHT, LEFT
     }
 
-    @Id
-    @GeneratedValue
-    private long id;
+//    @Id
+//    @GeneratedValue
+//    private long id;
 
     @Lob
     @Column(nullable = false)
@@ -48,7 +48,7 @@ public class Grid {
     }
 
 
-    private void validateGridStructure(@Nonnull byte[][] edges) throws GridFormatException {
+    private void validateGridStructure(byte[][] edges) throws GridFormatException {
         if (edges.length < 3 || edges.length % 2 == 0) {
             throw new GridFormatException("Invalid grid structure: edges matrix must have odd number of rows >= 3, but actual is " + edges.length);
         }

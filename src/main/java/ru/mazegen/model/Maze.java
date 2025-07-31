@@ -3,8 +3,12 @@ package ru.mazegen.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.mazegen.model.grids.Grid;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data
@@ -21,40 +25,35 @@ public class Maze {
     private long id;
 
 
-    @OneToOne(
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
-            fetch = FetchType.LAZY
-    )
-    @JoinColumn(name = "grid_id", referencedColumnName = "id", nullable = false)
+//    @OneToOne(
+//            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
+//            fetch = FetchType.LAZY
+//    )
+//    @JoinColumn(name = "grid_id", referencedColumnName = "id", nullable = false)
+    @NotNull
+    @Embedded
     private Grid grid;
-
 
     @ManyToOne(
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             fetch = FetchType.EAGER
     )
-    @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
-    private User author;
+    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    private @Nullable User author;
 
-
-    @Column(nullable = false)
     private int startX;
-
-    @Column(nullable = false)
     private int startY;
-
-    @Column(nullable = false)
     private int finishX;
-
-    @Column(nullable = false)
     private int finishY;
 
-    private String algorithm;
-    private LocalDateTime genDate;
+    private @Nullable String algorithm;
+
+    private @Nullable LocalDateTime genDate;
+
     private int genDurationMs;
 
 
-    public Maze(Grid grid, int startX, int startY, int finishX, int finishY) {
+    public Maze(@NotNull Grid grid, int startX, int startY, int finishX, int finishY) {
         this.grid = grid;
         this.startX = startX;
         this.startY = startY;

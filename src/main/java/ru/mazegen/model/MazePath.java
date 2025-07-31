@@ -1,62 +1,68 @@
 package ru.mazegen.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Data
 @NoArgsConstructor
-@Entity
+@Embeddable
 public class MazePath {
 
-    private record PathPoint (int x, int y){}
+    private static class PathPoint {
+        final int x, y;
+
+        public String asHexStr() {
+            return String.format("%x,%x", x, y); // %x - hex
+        }
+
+        public PathPoint(String hexStr) throws IllegalArgumentException {
+            var xy = hexStr.split(",");
+            if (xy.length != 2) throw new IllegalArgumentException();
+            this.x = Integer.parseInt(xy[0], 16);
+            this.y = Integer.parseInt(xy[1], 16);
+        }
+
+        public int[] asArray() {
+            return new int[]{x, y};
+        }
+    }
+
 
     @Converter
     private static class PathPointConverter implements AttributeConverter<PathPoint[], String> {
         @Override
         public String convertToDatabaseColumn(PathPoint[] points) {
-            var sb = new StringBuilder(points.length * 4);
-            for (PathPoint p : points) {
-                sb.append(Integer.toHexString(p.x)).append(',');
-                sb.append(Integer.toHexString(p.y)).append(',');
-            }
-            return sb.toString();
+            return String.join(";",
+                    Arrays.stream(points).map(PathPoint::asHexStr).toList()
+            );
         }
 
         @Override
         public PathPoint[] convertToEntityAttribute(String dbData) {
-            if (dbData != null && !dbData.isEmpty()) {
-                var pointsStr = dbData.split(",");
-                var ret = new PathPoint[pointsStr.length / 2];
-                for (int i = 0; i < ret.length; i++) {
-                    ret[i] = new PathPoint(
-                            Integer.parseInt(pointsStr[i * 2], 16),
-                            Integer.parseInt(pointsStr[i * 2 + 1], 16));
-                }
-                return ret;
-            }
-            return new PathPoint[0];
+            return (PathPoint[]) Arrays.stream(dbData.split(";"))
+                    .map(PathPoint::new).toArray();
         }
     }
 
 
-    @Id
-    @GeneratedValue
-    private long id;
+    @Convert(converter = PathPointConverter.class)
+    @Column(nullable = false)
+    private @NotNull PathPoint @NotNull [] path = new PathPoint[0];
 
     @ManyToOne(
             fetch = FetchType.EAGER,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-            optional = false
+            optional = false,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
-    private Maze maze;
+    private @NotNull Maze maze;
 
-    @Convert(converter = PathPointConverter.class)
-    @Column(nullable = false)
-    private PathPoint[] path;
-
-    private boolean isMazeCompleted;
-
+    boolean isMazeCompleted;
+    private @Nullable LocalDateTime completionDate;
 
 }

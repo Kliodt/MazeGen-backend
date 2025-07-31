@@ -1,6 +1,7 @@
 package ru.mazegen.model;
 
 import lombok.*;
+import org.jetbrains.annotations.Nullable;
 import ru.mazegen.model.mazeGenAlgorithms.EmptyMazeGenAlgorithm;
 import ru.mazegen.model.mazeGenAlgorithms.MazeGenAlgorithm;
 import ru.mazegen.model.mazeGenAlgorithms.RandomMazeGenAlgorithm;
@@ -63,6 +64,7 @@ public final class MazeGenerator {
     }
 
 
+    @Nullable
     public Maze generate() {
         if (!validateFields()) {
             return null;
