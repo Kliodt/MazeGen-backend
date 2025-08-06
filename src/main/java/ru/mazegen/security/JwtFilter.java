@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -31,14 +31,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @AuthenticationPrincipal
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
+            @NotNull HttpServletRequest request,
+            @NotNull HttpServletResponse response,
+            @NotNull FilterChain filterChain
     ) throws ServletException, IOException {
 
         String accessToken = jwtService.getAccessToken(request);
-        JwtAuthenticationImpl auth;
+        Authentication auth;
 
         if (accessToken == null) {
             auth = new JwtAuthenticationImpl(null, false);
@@ -58,7 +57,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        log.info("Request form user: {}", auth.getPrincipal());
+        log.info("Request from user {}", auth.getPrincipal());
 
         filterChain.doFilter(request, response);
     }

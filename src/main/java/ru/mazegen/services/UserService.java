@@ -3,12 +3,14 @@ package ru.mazegen.services;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import ru.mazegen.model.User;
 import ru.mazegen.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.function.Predicate;
 
 @Service
@@ -25,7 +27,7 @@ public class UserService {
      * @return true, on success, false if something went wrong
      */
     @Transactional
-    public boolean replaceRefreshTokenForUser(@NonNull String oldToken, @NonNull String newToken, long userId) {
+    public boolean replaceRefreshTokenForUser(@NotNull String oldToken, @NotNull String newToken, long userId) {
         var user = userRepo.findById(userId);
         if (user.isEmpty()) return false;
         var tokens = user.get().getRefreshTokens();
@@ -41,7 +43,7 @@ public class UserService {
      * Give a new refresh token to a user
      */
     @Transactional
-    public void addRefreshTokenForUser(@NonNull String token, long userId) {
+    public void addRefreshTokenForUser(@NotNull String token, long userId) {
         var user = userRepo.findById(userId).orElse(null);
         if (user == null) {
             log.warn("Tried to add refresh token for non existent user {}", userId);
@@ -63,9 +65,7 @@ public class UserService {
             return;
         }
         user.setRefreshTokens(
-                user.getRefreshTokens().stream()
-                        .filter(filter)
-                        .toList()
+                user.getRefreshTokens().stream().filter(filter).toList()
         );
     }
 
@@ -75,7 +75,7 @@ public class UserService {
      */
     @Transactional
     public User getOrCreateUserWithGoogleId(
-            @NonNull String googleId,
+            @NotNull String googleId,
             String nickname,
             String pictureUrl
     ) {
@@ -83,8 +83,14 @@ public class UserService {
 
         if (user != null) return user;
 
-        user = new User(googleId, pictureUrl, nickname, LocalDateTime.now());
+        user = new User(googleId, pictureUrl, nickname, OffsetDateTime.now());
         userRepo.save(user);
         return user;
+    }
+
+
+    @Nullable
+    public User getUserById(Long id) {
+        return userRepo.findById(id).orElse(null);
     }
 }

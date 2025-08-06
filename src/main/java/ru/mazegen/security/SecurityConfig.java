@@ -95,12 +95,10 @@ public class SecurityConfig {
         JWTUserInfo userInfo = JWTUserInfo.fromUser(user);
 
         var refreshToken = jwtService.createRefreshToken(userInfo);
-        var accessToken = jwtService.createAccessToken(userInfo);
 
         userService.addRefreshTokenForUser(refreshToken, userInfo.getUserId());
 
         jwtService.setRefreshToken(response, refreshToken);
-        jwtService.setAccessToken(response, accessToken);
 
         // clear expired and most likely dangling tokens
         userService.filterUserRefreshTokens(

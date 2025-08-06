@@ -1,17 +1,15 @@
 package ru.mazegen.model.grids;
 
-import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-
-import java.util.*;
-
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@Embeddable
 public class Grid {
 
     /**
@@ -21,12 +19,7 @@ public class Grid {
         TOP, BOTTOM, RIGHT, LEFT
     }
 
-//    @Id
-//    @GeneratedValue
-//    private long id;
 
-    @Lob
-    @Column(nullable = false)
     private byte[][] edges; // Matrix representing the maze edges
 
 
@@ -36,7 +29,7 @@ public class Grid {
         // init edges matrix
         for (int i = 0; i < this.edges.length; i++) {
             this.edges[i] = new byte[sizeX + 1];
-            Arrays.fill(this.edges[i], (byte)(filledGrid ? 1 : 0));
+            Arrays.fill(this.edges[i], (byte) (filledGrid ? 1 : 0));
         }
     }
 
@@ -59,7 +52,7 @@ public class Grid {
                 throw new GridFormatException("Grid row can't be null: row " + i + " is null");
             }
         }
-        
+
         // Check that all rows have the same length >= 2
         int expectedRowLength = edges[0].length;
         for (int i = 1; i < edges.length; i++) {
@@ -72,10 +65,10 @@ public class Grid {
             throw new GridFormatException("Invalid grid structure: matrix must have number of columns >= 2, but actual is " + expectedRowLength);
         }
     }
-        
+
 
     public final int getSizeX() {
-        return edges.length > 0 ? edges[0].length - 1: 0;
+        return edges.length > 0 ? edges[0].length - 1 : 0;
     }
 
     public final int getSizeY() {
@@ -94,20 +87,20 @@ public class Grid {
     private void setCellEdge(int cellX, int cellY, Edge edge, boolean value) {
         var val = (byte) (value ? 1 : 0);
         switch (edge) {
-            case TOP    -> edges[cellY * 2]    [cellX]     = val;
-            case BOTTOM -> edges[cellY * 2 + 2][cellX]     = val;
-            case LEFT   -> edges[cellY * 2 + 1][cellX]     = val;
-            case RIGHT  -> edges[cellY * 2 + 1][cellX + 1] = val;
+            case TOP -> edges[cellY * 2][cellX] = val;
+            case BOTTOM -> edges[cellY * 2 + 2][cellX] = val;
+            case LEFT -> edges[cellY * 2 + 1][cellX] = val;
+            case RIGHT -> edges[cellY * 2 + 1][cellX + 1] = val;
         }
     }
 
 
     private boolean getCellEdge(int cellX, int cellY, Edge edge) {
         var val = switch (edge) {
-            case TOP    -> edges[cellY * 2]    [cellX];
+            case TOP -> edges[cellY * 2][cellX];
             case BOTTOM -> edges[cellY * 2 + 2][cellX];
-            case LEFT   -> edges[cellY * 2 + 1][cellX];
-            case RIGHT  -> edges[cellY * 2 + 1][cellX + 1];
+            case LEFT -> edges[cellY * 2 + 1][cellX];
+            case RIGHT -> edges[cellY * 2 + 1][cellX + 1];
         };
         return val != 0;
     }

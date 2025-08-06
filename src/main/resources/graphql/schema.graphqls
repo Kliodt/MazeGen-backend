@@ -1,20 +1,15 @@
 type Query {
-    getMazeById(id: ID!): MazeOrError
+    getUserById(userId: Int!): User
+    getMazeById(mazeId: Int!): Maze
+    getMazesByUser(userId: Int!): [Maze!]
 }
 
 type Mutation {
-    generateMaze(
-        parameters: MazeGenerator!,
-        userId: ID
-    ): MazeOrError
-
-    "Return if submission accepted/declined"
-    submitMazeCompletion(
-        mazeId: ID!,
-        userId: ID!,
-        path: [Point!]!,
-    ): Boolean
+    generateMaze(parameters: MazeGenerator!): GeneratorResult
 }
+
+# -------------- scalar types --------------
+scalar DateTime
 
 # -------------- input types --------------
 
@@ -26,41 +21,45 @@ input MazeGenerator {
     startY: Int
     finishX: Int
     finishY: Int
-
-    # other parameters
-}
-
-input Point {
-    x: Int!
-    y: Int!
 }
 
 # -------------- output types --------------
 
 type Maze {
-    id: ID!
+    id: Int!
     grid: [[Int!]!]!
+    author: User
     startX: Int!
     startY: Int!
     finishX: Int!
     finishY: Int!
 
-    author: User
     algorithm: String
-    genDate: String
+    genDate: DateTime
     genDurationMs: Int
 }
 
-type User {
-    id: ID!
-    nickname: String!
-    registrationDate: String # todo: method to dump this
-    mazes: [Maze]
+type MazePath {
+    points: [[Int!]!]!
+    maze: Maze!
+    isMazeCompleted: Boolean
+    completionDate: DateTime
 }
 
-# -------------- error types --------------
+type User {
+    id: Int!
+    nickname: String!
+    profilePictureUrl: String
+    registrationDate: DateTime
 
-type Error {code: Int! description: String!}
+    # Fields available only to the user himself
+    mazePaths: [MazePath!]
+    role: String
+}
 
-union MazeOrError = Maze | Error
-union UserOrError = User | Error
+type GeneratorResult {
+    maze: Maze
+    errorCode: Int
+    errorDescription: String
+}
+

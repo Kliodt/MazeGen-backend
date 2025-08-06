@@ -7,9 +7,9 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import ru.mazegen.security.JWTUserInfo;
 
@@ -37,9 +37,8 @@ public class JWTService {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-
     @Nullable
-    private String createToken(@NonNull JWTUserInfo user, boolean isRefresh) {
+    private String createToken(@NotNull JWTUserInfo user, boolean isRefresh) {
         long lifetimeMs = isRefresh ? refreshTokenLifetimeMs : accessTokenLifetimeMs;
         return Jwts.builder()
                 .setClaims(user.getClaims())
@@ -50,8 +49,8 @@ public class JWTService {
     }
 
 
-    @NonNull
-    public JWTParseResult parseToken(@NonNull String token) {
+    @NotNull
+    public JWTParseResult parseToken(@NotNull String token) {
         JwtParser parser = Jwts.parserBuilder()
                 .setSigningKey(getSecretKey())
                 .build();
@@ -67,7 +66,7 @@ public class JWTService {
     }
 
 
-    private void setToken(HttpServletResponse response, String token, boolean isRefresh) {
+    private void setTokenCookie(HttpServletResponse response, String token, boolean isRefresh) {
         Cookie cookie = new Cookie(isRefresh ? "refresh_token" : "access_token", token);
         cookie.setHttpOnly(true);
         //        cookie.setSecure(true); todo: after migrating from http to https
@@ -77,7 +76,7 @@ public class JWTService {
     }
 
 
-    private String getToken(HttpServletRequest request, boolean isRefresh) {
+    private String getTokenCookie(HttpServletRequest request, boolean isRefresh) {
         var cookies = request.getCookies();
         if (cookies == null) return null;
         var name = isRefresh ? "refresh_token" : "access_token";
@@ -90,20 +89,28 @@ public class JWTService {
     }
 
 
-    public void setAccessToken(HttpServletResponse response, String token) {
-        setToken(response, token, false);
+    private String getTokenFromAuthHeader(HttpServletRequest request) {
+        var prefix = "Bearer ";
+        var str = request.getHeader("Authorization");
+        if (str == null || !str.startsWith(prefix)) return null;
+        return str.substring(prefix.length());
     }
 
-    public void setRefreshToken(HttpServletResponse response, String token) {
-        setToken(response, token, true);
+
+    public void setAccessToken(HttpServletResponse response, @NotNull String token) {
+        setTokenCookie(response, token, false);
+    }
+
+    public void setRefreshToken(HttpServletResponse response, @NotNull String token) {
+        setTokenCookie(response, token, true);
     }
 
     public String getAccessToken(HttpServletRequest request) {
-        return getToken(request, false);
+        return getTokenFromAuthHeader(request);
     }
 
     public String getRefreshToken(HttpServletRequest request) {
-        return getToken(request, true);
+        return getTokenCookie(request, true);
     }
 
     public String createAccessToken(JWTUserInfo userInfo) {

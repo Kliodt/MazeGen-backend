@@ -1,12 +1,14 @@
 package ru.mazegen.model;
 
 import lombok.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.mazegen.model.mazeGenAlgorithms.EmptyMazeGenAlgorithm;
 import ru.mazegen.model.mazeGenAlgorithms.MazeGenAlgorithm;
 import ru.mazegen.model.mazeGenAlgorithms.RandomMazeGenAlgorithm;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.*;
 
 /**
@@ -16,10 +18,11 @@ import java.util.*;
  * @see MazeGenAlgorithm
  */
 @Data
+@AllArgsConstructor
 public final class MazeGenerator {
     private int width;
     private int height;
-    private String algorithmKeyStr;
+    private @NotNull String algorithmKeyStr;
 
     private int startX;
     private int startY;
@@ -41,7 +44,6 @@ public final class MazeGenerator {
 
     // make fields valid where possible and return true, return false otherwise
     private boolean validateFields() {
-        if (algorithmKeyStr == null) return false;
 
         width = clamp(width, 3, 1000);
         height = clamp(height, 3, 1000);
@@ -84,7 +86,7 @@ public final class MazeGenerator {
 
         maze.setMetaInformation(
                 generator.getFullAlgorithmName(),
-                LocalDateTime.now(),
+                OffsetDateTime.now(),
                 (int) (endTime - startTime)
         );
 

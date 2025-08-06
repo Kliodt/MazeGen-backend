@@ -1,6 +1,6 @@
-package ru.mazegen.controllers;
+package ru.mazegen.controllers.rest;
 
-import jakarta.servlet.http.Cookie;
+import com.nimbusds.jose.shaded.gson.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.mazegen.security.JWTUserInfo;
 import ru.mazegen.services.JWTService;
 import ru.mazegen.services.UserService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -28,7 +31,7 @@ public class AuthController {
      * (usually first request when user enters the website, also when access token expires)
      */
     @PostMapping("/token")
-    public void updateTokens(HttpServletRequest request, HttpServletResponse response) {
+    public Map<String, String> updateTokens(HttpServletRequest request, HttpServletResponse response) {
 
         var oldRefreshToken = jwtService.getRefreshToken(request);
 
@@ -36,7 +39,7 @@ public class AuthController {
         if (oldRefreshToken == null) {
             log.info("null refresh token");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            return null;
         }
 
         var parseResult = jwtService.parseToken(oldRefreshToken);
@@ -45,7 +48,7 @@ public class AuthController {
         if (parseResult.isExpired() || !parseResult.isValid()) {
             log.info("expired or invalid refresh token");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            return null;
         }
 
         JWTUserInfo userInfo = parseResult.jwtUserInfo();
@@ -55,7 +58,7 @@ public class AuthController {
         if (!userService.replaceRefreshTokenForUser(oldRefreshToken, newRefreshToken, userInfo.getUserId())) {
             log.info("token reused: {}", oldRefreshToken);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+            return null;
         }
 
         // give the user new tokens
@@ -63,11 +66,14 @@ public class AuthController {
 
         jwtService.setAccessToken(response, newAccessToken);
         jwtService.setRefreshToken(response, newRefreshToken);
+
+        return Map.of("access_token", newAccessToken); // json
     }
 
 
     @GetMapping("/me")
     public String getMe(@AuthenticationPrincipal JWTUserInfo userInfo) {
+        log.info("me is {}", userInfo);
         return "user: " + userInfo;
     }
 }

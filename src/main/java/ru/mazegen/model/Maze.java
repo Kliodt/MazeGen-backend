@@ -1,12 +1,17 @@
 package ru.mazegen.model;
 
+import com.nimbusds.jose.shaded.gson.Gson;
+import com.nimbusds.jose.shaded.gson.GsonBuilder;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.mazegen.model.grids.Grid;
-import java.time.LocalDateTime;
+import ru.mazegen.model.grids.GridFormatException;
+
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,20 +29,12 @@ public class Maze {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Convert(converter = GridToStringConverter.class)
+    private @NotNull Grid grid;
 
-//    @OneToOne(
-//            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
-//            fetch = FetchType.LAZY
-//    )
-//    @JoinColumn(name = "grid_id", referencedColumnName = "id", nullable = false)
-    @NotNull
-    @Embedded
-    private Grid grid;
-
-    @ManyToOne(
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-            fetch = FetchType.EAGER
-    )
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private @Nullable User author;
 
@@ -46,9 +43,9 @@ public class Maze {
     private int finishX;
     private int finishY;
 
+    @Column(length = 64)
     private @Nullable String algorithm;
-
-    private @Nullable LocalDateTime genDate;
+    private @Nullable OffsetDateTime genDate;
 
     private int genDurationMs;
 
@@ -61,14 +58,30 @@ public class Maze {
         this.finishY = finishY;
     }
 
-    public void setMetaInformation(String algorithm, LocalDateTime genDate, int genDurationMs) {
+    public void setMetaInformation(@NotNull String algorithm, @NotNull OffsetDateTime genDate, int genDurationMs) {
         this.algorithm = algorithm;
         this.genDate = genDate;
         this.genDurationMs = genDurationMs;
     }
 
     boolean isCompletableWithPath(MazePath path) {
-        // todo:
+        for (var point : path.getPoints()) {
+
+        }
         return false;
+    }
+
+
+    @Converter
+    private static class GridToStringConverter implements AttributeConverter<Grid, String> {
+        @Override
+        public String convertToDatabaseColumn(Grid grid) {
+            return new Gson().toJson(grid.getEdges());
+        }
+
+        @Override
+        public Grid convertToEntityAttribute(String dbData) throws GridFormatException {
+            return new Grid(new Gson().fromJson(dbData, byte[][].class));
+        }
     }
 }
