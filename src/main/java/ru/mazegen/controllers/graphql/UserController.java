@@ -32,13 +32,6 @@ public class UserController {
 
     // --------------------- resolve private fields ---------------------
 
-    @SchemaMapping(typeName = "User", field = "mazePaths")
-    public List<MazePath> resolveMazePaths(User user, @AuthenticationPrincipal JWTUserInfo userInfo) {
-        if (user.getId() != userInfo.getUserId()) return null;
-        return user.getMazePaths();
-    }
-
-
     @SchemaMapping(typeName = "User", field = "role")
     public String resolveRole(User user, @AuthenticationPrincipal JWTUserInfo userInfo) {
         if (user.getId() != userInfo.getUserId()) return null;

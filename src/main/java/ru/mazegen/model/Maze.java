@@ -64,11 +64,42 @@ public class Maze {
         this.genDurationMs = genDurationMs;
     }
 
-    boolean isCompletableWithPath(MazePath path) {
-        for (var point : path.getPoints()) {
 
+    /**
+     * Valid move is the move by exactly 1 cell that is not crossing the edge.
+     */
+    public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
+        if (Math.abs(fromX - toX) + Math.abs(fromY - toY) != 1) return false;
+        if (fromX < 0 || fromY < 0 || toX < 0 || toY < 0) return false;
+        if (fromX >= grid.getSizeX() || fromY >= grid.getSizeY() || toX >= grid.getSizeX() || toY >= grid.getSizeY()) return false;
+
+        Grid.Edge edge;
+        if (fromX - toX != 0) {
+            edge = fromX - toX > 0 ? Grid.Edge.LEFT : Grid.Edge.RIGHT;
+        } else {
+            edge = fromY - toY > 0 ? Grid.Edge.TOP : Grid.Edge.BOTTOM;
         }
-        return false;
+        return !grid.isCellEdgeActive(fromX, fromY, edge);
+    }
+
+    public boolean isCompletableWithPath(MazePath path) {
+        var points = path.getPoints();
+        if (points.length == 0) return false;
+
+        // check start and finish
+        if (points[0][0] != startX || points[0][1] != startY) return false;
+        if (points[points.length - 1][0] != finishX || points[points.length - 1][1] != finishY) return false;
+
+        // make sure that all moves are valid
+        var from = points[0];
+        for (int i = 1; i < points.length; i++) {
+            var to = points[i];
+            if (!isValidMove(from[0], from[1], to[0], to[1])) {
+                return false;
+            }
+            from = to;
+        }
+        return true;
     }
 
 

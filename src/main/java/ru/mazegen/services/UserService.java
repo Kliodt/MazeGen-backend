@@ -54,6 +54,20 @@ public class UserService {
 
 
     /**
+     * Give a new refresh token to a user
+     * @return true on success
+     */
+    @Transactional
+    public boolean removeRefreshTokenForUser(@NotNull String token, long userId) {
+        var user = userRepo.findById(userId).orElse(null);
+        if (user == null) {
+            return false;
+        }
+        return user.getRefreshTokens().remove(token);
+    }
+
+
+    /**
      * Basically, a way to remove expired tokens (but without explicit jwtService dependency)
      * @param filter predicate that determines if token should be retained
      */

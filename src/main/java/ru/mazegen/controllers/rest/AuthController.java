@@ -6,10 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.mazegen.security.JWTUserInfo;
 import ru.mazegen.services.JWTService;
 import ru.mazegen.services.UserService;
@@ -71,11 +68,35 @@ public class AuthController {
     }
 
 
-    @GetMapping("/me")
-    public String getMe(@AuthenticationPrincipal JWTUserInfo userInfo) {
-        log.info("me is {}", userInfo);
-        return "user: " + userInfo;
+    /**
+     * Invalidate current refresh token. (Access token still could be used until it expires)
+     */
+    @PostMapping("/logout")
+    public void logoutUser(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal JWTUserInfo userInfo) {
+        if (userInfo == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        var oldRefreshToken = jwtService.getRefreshToken(request);
+
+        if (oldRefreshToken != null && userService.removeRefreshTokenForUser(oldRefreshToken, userInfo.getUserId())) {
+            return;
+        }
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
+
+
+//    @GetMapping("/me")
+//    public String getMe(HttpServletResponse response, @AuthenticationPrincipal JWTUserInfo userInfo) {
+//        if (userInfo == null) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            return null;
+//        }
+//        log.info("me is {}", userInfo);
+//        return "user: " + userInfo;
+//    }
 }
 
 

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -45,15 +46,16 @@ public class JwtFilter extends OncePerRequestFilter {
         } else {
             var parseResult = jwtService.parseToken(accessToken);
 
-            if (!parseResult.isValid()) {
-                auth = new JwtAuthenticationImpl(null, false);
-                log.warn("Request form user with invalid token {}", accessToken);
-            } else if (parseResult.isExpired()) {
-                auth = new JwtAuthenticationImpl(parseResult.jwtUserInfo(), false);
-            } else {
+            if (parseResult.isValid() || !parseResult.isExpired()) {
                 auth = new JwtAuthenticationImpl(parseResult.jwtUserInfo(), true);
+            } else {
+                auth = new JwtAuthenticationImpl(null, false);
             }
         }
+
+        log.info("Session {}", request.getSession(false));
+
+
 
         SecurityContextHolder.getContext().setAuthentication(auth);
 

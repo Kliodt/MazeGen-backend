@@ -1,5 +1,6 @@
 package ru.mazegen.security;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -106,16 +107,15 @@ public class SecurityConfig {
                 userInfo.getUserId()
         );
 
+        // Clear the session created by oauth2
+        var session = request.getSession(false);
+        if (session != null) session.invalidate();
+        Cookie jsessionCookie = new Cookie("JSESSIONID", "");
+        jsessionCookie.setMaxAge(0);
+        jsessionCookie.setPath("/");
+        jsessionCookie.setHttpOnly(true);
+        response.addCookie(jsessionCookie);
 
-        response.sendRedirect("http://localhost:3000/"); // todo
-
-//        var headerNames = request.getHeaderNames();
-//        while (headerNames.hasMoreElements()) {
-//            String headerName = headerNames.nextElement();
-//            log.info("request header {} --- {}", headerName, request.getHeader(headerName));
-//
-//        }
-
-        // todo: deal with google's session id
+        response.sendRedirect("http://localhost:3000/");
     }
 }

@@ -1,11 +1,15 @@
 type Query {
     getUserById(userId: Int!): User
     getMazeById(mazeId: Int!): Maze
-    getMazesByUser(userId: Int!): [Maze!]
+
+    getMazesByUser(userId: Int!, pivotId: Int!, pageNum: Int!, pageSize: Int!): [Maze!]!
+    getRecentMazes(pivotId: Int!, pageNum: Int!, pageSize: Int!): [Maze!]!
 }
 
 type Mutation {
     generateMaze(parameters: MazeGenerator!): GeneratorResult
+    savePath(path: [[Int!]!]!, mazeId: Int): Boolean
+    submitSolution(path: [[Int!]!]!, mazeId: Int): Boolean
 }
 
 # -------------- scalar types --------------
@@ -28,21 +32,27 @@ input MazeGenerator {
 type Maze {
     id: Int!
     grid: [[Int!]!]!
-    author: User
     startX: Int!
     startY: Int!
     finishX: Int!
     finishY: Int!
 
+    author: User
     algorithm: String
     genDate: DateTime
     genDurationMs: Int
+
+    # synthetic fields
+
+    "Maze path for a user who made a request"
+    userPath: MazePath
 }
 
 type MazePath {
     points: [[Int!]!]!
     maze: Maze!
-    isMazeCompleted: Boolean
+    user: User!
+    isMazeCompleted: Boolean!
     completionDate: DateTime
 }
 
@@ -53,7 +63,6 @@ type User {
     registrationDate: DateTime
 
     # Fields available only to the user himself
-    mazePaths: [MazePath!]
     role: String
 }
 

@@ -43,9 +43,9 @@ public final class User {
     @Enumerated(EnumType.STRING)
     private @NotNull Role role = Role.USER;
 
-    @Column(nullable = false)
-    @ElementCollection(fetch = FetchType.LAZY)
-    private @NotNull List<@NotNull MazePath> mazePaths = new ArrayList<>();
+//    @Column(nullable = false)
+//    @ElementCollection(fetch = FetchType.LAZY)
+//    private @NotNull List<@NotNull MazePath> mazePaths = new ArrayList<>();
 
     public User(@Nullable String googleId,
                 @Nullable String profilePictureUrl,

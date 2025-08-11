@@ -8,16 +8,38 @@ spring:
       enabled: true
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/andreev
-    username: postgres
-    password: 1
     driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+
 
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
 
+
+  security:
+    jwt:
+      secret_key: ${JWT_SECRET_KEY} # length must be >= 32
+      access_token_lifetime_ms: 3600000 # 1 hour
+      refresh_token_lifetime_ms: 2592000000 # 30 days
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
 
 
 logging:

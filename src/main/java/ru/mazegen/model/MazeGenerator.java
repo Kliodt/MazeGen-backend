@@ -45,8 +45,8 @@ public final class MazeGenerator {
     // make fields valid where possible and return true, return false otherwise
     private boolean validateFields() {
 
-        width = clamp(width, 3, 1000);
-        height = clamp(height, 3, 1000);
+        width = clamp(width, 3, 100);
+        height = clamp(height, 3, 100);
 
         algorithmKeyStr = algorithmKeyStr.toLowerCase();
 

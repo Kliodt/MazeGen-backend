@@ -6,32 +6,51 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.mazegen.model.grids.Grid;
-import ru.mazegen.model.grids.GridFormatException;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 
 @Data
 @NoArgsConstructor
-@Embeddable
+@Entity
+@Table(indexes = {
+        // optimize search by maze
+        @Index(name = "mazePath_maze_index", columnList = "maze_id")
+})
 public class MazePath {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     @Lob
     @Column(nullable = false)
-    @Basic(fetch = FetchType.LAZY)
+    @Basic(fetch = FetchType.EAGER)
     @Convert(converter = PathPointsToStringConverter.class)
     private int[][] points;
 
     @ManyToOne(
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             optional = false
     )
     private @NotNull Maze maze;
 
-    boolean isMazeCompleted;
-    private @Nullable OffsetDateTime completionDate;
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false
+    )
+    private @NotNull User user;
 
+    boolean isMazeCompleted = false;
+    private @Nullable OffsetDateTime completionDate = null;
+
+
+    public MazePath(int @NotNull [] @NotNull [] points, @NotNull Maze maze) throws IllegalArgumentException {
+        for (var p : points) {
+            if (p.length != 2) throw new IllegalArgumentException();
+        }
+        this.points = points;
+        this.maze = maze;
+    }
 
     @Converter
     private static class PathPointsToStringConverter implements AttributeConverter<int[][], String> {
