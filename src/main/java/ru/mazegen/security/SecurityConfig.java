@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,9 +36,9 @@ public class SecurityConfig {
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            public void addCorsMappings(@NotNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")
+                        .allowedOrigins("http://localhost:8080") // todo: add prod. urls
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);
@@ -62,7 +63,9 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .csrf(AbstractHttpConfigurer::disable) // todo: разобраться с этим
+                // Disable standard csrf token, because we use JWT
+                .csrf(AbstractHttpConfigurer::disable)
+                // No default login and logout pages
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .build();
@@ -70,7 +73,7 @@ public class SecurityConfig {
 
 
     /**
-     * Get tokens from Google Token api
+     * Get tokens and user info from Google Token api and then authorize user
      */
     private void onGoogleAuthSuccess(
             HttpServletRequest request,
@@ -116,6 +119,6 @@ public class SecurityConfig {
         jsessionCookie.setHttpOnly(true);
         response.addCookie(jsessionCookie);
 
-        response.sendRedirect("http://localhost:3000/");
+        response.sendRedirect("/");
     }
 }

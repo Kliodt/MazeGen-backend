@@ -3,36 +3,33 @@ package ru.mazegen.controllers.graphql;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import ru.mazegen.model.Maze;
 import ru.mazegen.model.MazeGenerator;
 import ru.mazegen.model.MazePath;
-import ru.mazegen.repository.MazePathRepository;
-import ru.mazegen.repository.MazeRepository;
 import ru.mazegen.security.JWTUserInfo;
 import ru.mazegen.services.MazeService;
+import ru.mazegen.services.PathService;
 
 import java.util.List;
 
 
 @Controller
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000"})
 @Slf4j
 public class MazeController {
 
 
+    private final PathService pathService;
+    private final MazeService mazeService;
+
     public record GeneratorResult(Maze maze, int errorCode, String errorDescription) {
     }
-
-    private final MazeService mazeService;
 
 
     @QueryMapping
@@ -64,8 +61,8 @@ public class MazeController {
 
     @MutationMapping
     public GeneratorResult generateMaze(
-        @Argument @NotNull MazeGenerator parameters,
-        @AuthenticationPrincipal JWTUserInfo userInfo
+            @Argument @NotNull MazeGenerator parameters,
+            @AuthenticationPrincipal JWTUserInfo userInfo
     ) {
         var maze = parameters.generate();
         if (maze == null) {
@@ -91,11 +88,10 @@ public class MazeController {
 
     // ---------------------- synthetic fields ----------------------
 
-    @SchemaMapping(typeName = "Maze", field = "path")
+    @SchemaMapping(typeName = "Maze", field = "userPath")
     public MazePath getPathForUser(@NotNull Maze maze, @AuthenticationPrincipal JWTUserInfo userInfo) {
         if (userInfo == null) return null;
-        return mazeService.getPathByUserAndMaze(userInfo.getUserId(), maze.getId());
+        return pathService.getPathByUserAndMaze(userInfo.getUserId(), maze.getId());
     }
-
 
 }

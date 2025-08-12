@@ -8,17 +8,12 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import ru.mazegen.model.MazePath;
 import ru.mazegen.model.User;
 import ru.mazegen.security.JWTUserInfo;
 import ru.mazegen.services.UserService;
 
-import java.util.List;
-
 @Controller
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000"})
 @Slf4j
 public class UserController {
 

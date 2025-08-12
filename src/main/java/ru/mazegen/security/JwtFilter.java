@@ -53,13 +53,12 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        log.info("Session {}", request.getSession(false));
-
-
-
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         log.info("Request from user {}", auth.getPrincipal());
+        log.info("Request url {}", request.getRequestURL());
+        log.info("Request origin {}", request.getHeader("Origin"));
+        log.info("Request host {}", request.getHeader("Host"));
 
         filterChain.doFilter(request, response);
     }

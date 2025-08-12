@@ -7,9 +7,10 @@ type Query {
 }
 
 type Mutation {
-    generateMaze(parameters: MazeGenerator!): GeneratorResult
-    savePath(path: [[Int!]!]!, mazeId: Int): Boolean
-    submitSolution(path: [[Int!]!]!, mazeId: Int): Boolean
+    generateMaze(parameters: MazeGenerator!): GeneratorResult!
+
+    saveMazePath(points: [[Int!]!]!, mazeId: Int): Boolean!
+    submitMazeCompletion(points: [[Int!]!]!, mazeId: Int): MazePath
 }
 
 # -------------- scalar types --------------

@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.mazegen.model.MazePath;
 
 @Repository
-public interface MazePathRepository extends CrudRepository<MazePath, Long> {
+public interface PathRepository extends CrudRepository<MazePath, Long> {
     MazePath findByMazeIdAndUserId(long mazeId, long userId);
 }

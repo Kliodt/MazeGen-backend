@@ -8,9 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.mazegen.model.Maze;
-import ru.mazegen.model.MazePath;
 import ru.mazegen.model.User;
-import ru.mazegen.repository.MazePathRepository;
+import ru.mazegen.repository.PathRepository;
 import ru.mazegen.repository.MazeRepository;
 import ru.mazegen.repository.UserRepository;
 
@@ -23,7 +22,7 @@ public class MazeService {
 
     private final MazeRepository mazeRepository;
     private final UserRepository userRepository;
-    private final MazePathRepository mazePathRepository;
+    private final PathRepository mazePathRepository;
 
     /**
      * Find maze by id, return null if not exists
@@ -65,11 +64,4 @@ public class MazeService {
         var page = PageRequest.of(pageNum, pageSize, sort);
         return mazeRepository.findAllByIdLessThan(pivotId + 1, page);
     }
-
-
-    public MazePath getPathByUserAndMaze(long userId, long mazeId) {
-        return mazePathRepository.findByMazeIdAndUserId(mazeId, userId);
-    }
-
-
 }

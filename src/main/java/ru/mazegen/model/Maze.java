@@ -1,19 +1,15 @@
 package ru.mazegen.model;
 
 import com.nimbusds.jose.shaded.gson.Gson;
-import com.nimbusds.jose.shaded.gson.GsonBuilder;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.mazegen.model.grids.Grid;
 import ru.mazegen.model.grids.GridFormatException;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Data
@@ -71,7 +67,8 @@ public class Maze {
     public boolean isValidMove(int fromX, int fromY, int toX, int toY) {
         if (Math.abs(fromX - toX) + Math.abs(fromY - toY) != 1) return false;
         if (fromX < 0 || fromY < 0 || toX < 0 || toY < 0) return false;
-        if (fromX >= grid.getSizeX() || fromY >= grid.getSizeY() || toX >= grid.getSizeX() || toY >= grid.getSizeY()) return false;
+        if (fromX >= grid.getSizeX() || fromY >= grid.getSizeY() || toX >= grid.getSizeX() || toY >= grid.getSizeY())
+            return false;
 
         Grid.Edge edge;
         if (fromX - toX != 0) {
@@ -82,13 +79,12 @@ public class Maze {
         return !grid.isCellEdgeActive(fromX, fromY, edge);
     }
 
-    public boolean isCompletableWithPath(MazePath path) {
+    public boolean isValidPath(MazePath path) {
         var points = path.getPoints();
         if (points.length == 0) return false;
 
-        // check start and finish
+        // check start
         if (points[0][0] != startX || points[0][1] != startY) return false;
-        if (points[points.length - 1][0] != finishX || points[points.length - 1][1] != finishY) return false;
 
         // make sure that all moves are valid
         var from = points[0];
@@ -100,6 +96,12 @@ public class Maze {
             from = to;
         }
         return true;
+    }
+
+    public boolean isCompletableWithPath(MazePath path) {
+        var points = path.getPoints();
+        if (points[points.length - 1][0] != finishX || points[points.length - 1][1] != finishY) return false;
+        return isValidPath(path);
     }
 
 
