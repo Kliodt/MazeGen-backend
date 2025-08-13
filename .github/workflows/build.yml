@@ -1,0 +1,38 @@
+name: Build MazeGen backend
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  buildMazeGen:
+
+    name: MazeGen build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download latest frontend
+        id: frontendDownload
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: Kliodt/MazeGen-website
+          latest: true
+          fileName: '*.zip'
+          out-file-path: /tmp
+
+      - run: mkdir -p ./src/main/resources/static
+
+      - name: Unzip archive
+        run: unzip '${{ fromJson(steps.frontendDownload.outputs.downloaded_files)[0] }}' -d ./src/main/resources/static
+
+      - name: Build
+        run: gradle bootWar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./build/libs/*.war
