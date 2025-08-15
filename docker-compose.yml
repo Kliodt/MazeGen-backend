@@ -27,9 +27,9 @@ services:
   mazegen:
     image: vadimkliodt/mazegen
     container_name: mazegen-container
-    build: .
     ports:
       - "8080:8080"
+
     restart: no # todo: change it
 
     env_file:
