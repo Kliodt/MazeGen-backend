@@ -11,10 +11,13 @@ services:
     ports:
       - "5432:5432"
 
+    env_file:
+      - .env
+
     environment:
-#      POSTGRES_PASSWORD: ${DB_PASS} # todo: set in environment
-#      POSTGRES_USER: ${DB_USER}
-#      POSTGRES_DB: mazegen # name
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: mazegen # name
       PGDATA: /var/lib/postgresql/data
 
     volumes:
@@ -28,6 +31,9 @@ services:
     ports:
       - "8080:8080"
     restart: no # todo: change it
+
+    env_file:
+      - .env
 
     depends_on:
       - db
