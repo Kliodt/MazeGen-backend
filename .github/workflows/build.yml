@@ -48,7 +48,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Docker build
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mazegen
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mazegen .
 
       - name: Docker push
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/mazegen
