@@ -48,7 +48,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          push: true
-          tags: '${{ secrets.DOCKERHUB_USERNAME }}/mazegen:${{ github.sha }}'
+        run: docker compose build
+
+      - name: Tag
+        run: docker tag mazegen '${{ secrets.DOCKERHUB_USERNAME }}/mazegen:${{ github.sha }}'
+
+      - name: Push
+        run: docker compose push '${{ secrets.DOCKERHUB_USERNAME }}/mazegen:${{ github.sha }}'
