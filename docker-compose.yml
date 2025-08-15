@@ -22,7 +22,7 @@ services:
 
 
   mazegen:
-    image: mazegen
+    image: vadimkliodt/mazegen
     container_name: mazegen-container
     build: .
     ports:
