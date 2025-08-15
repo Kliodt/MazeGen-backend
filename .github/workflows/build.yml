@@ -54,4 +54,4 @@ jobs:
         run: docker tag mazegen '${{ secrets.DOCKERHUB_USERNAME }}/mazegen:${{ github.sha }}'
 
       - name: Push
-        run: docker compose push '${{ secrets.DOCKERHUB_USERNAME }}/mazegen:${{ github.sha }}'
+        run: docker compose push mazegen
