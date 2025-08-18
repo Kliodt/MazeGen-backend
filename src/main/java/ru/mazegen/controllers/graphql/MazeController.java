@@ -1,5 +1,6 @@
 package ru.mazegen.controllers.graphql;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -51,9 +52,7 @@ public class MazeController {
 
     @QueryMapping
     public List<Maze> getRecentMazes(
-            @Argument long pivotId,
-            @Argument int pageNum,
-            @Argument int pageSize
+            @Argument long pivotId, @Argument int pageNum, @Argument int pageSize
     ) {
         return mazeService.getRecentMazes(pivotId, pageNum, pageSize);
     }
@@ -66,7 +65,8 @@ public class MazeController {
     ) {
         var maze = parameters.generate();
         if (maze == null) {
-            return new GeneratorResult(null, -1, "Invalid parameters! Check that 'algorithmKeyStr' is an existing key!");
+            return new GeneratorResult(null, -1,
+                    "Invalid parameters! Check that 'algorithmKeyStr' is an existing key!");
         }
 
         if (userInfo != null) {
@@ -81,16 +81,22 @@ public class MazeController {
 
     // ---------------------- converters ----------------------
 
+
     @SchemaMapping(typeName = "Maze", field = "grid")
     public byte[][] resolveGridField(@NotNull Maze maze) {
         return maze.getGrid().getEdges();
     }
 
+
     // ---------------------- synthetic fields ----------------------
 
+
     @SchemaMapping(typeName = "Maze", field = "userPath")
-    public MazePath getPathForUser(@NotNull Maze maze, @AuthenticationPrincipal JWTUserInfo userInfo) {
-        if (userInfo == null) return null;
+    public MazePath getPathForUser(
+            @NotNull Maze maze, @AuthenticationPrincipal JWTUserInfo userInfo
+    ) {
+        if (userInfo == null)
+            return null;
         return pathService.getPathByUserAndMaze(userInfo.getUserId(), maze.getId());
     }
 

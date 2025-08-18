@@ -1,5 +1,6 @@
 package ru.mazegen.security;
 
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +21,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import ru.mazegen.model.User;
 import ru.mazegen.services.JWTService;
 import ru.mazegen.services.UserService;
+
 import java.io.IOException;
+
 
 @Configuration
 @EnableWebSecurity
@@ -39,36 +42,28 @@ public class SecurityConfig {
             public void addCorsMappings(@NotNull CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:8080") // todo: add prod. urls
-                        .allowedMethods("*")
-                        .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowedMethods("*").allowedHeaders("*").allowCredentials(true);
             }
         };
     }
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)
+            throws Exception {
 
-        return httpSecurity
-                .authorizeHttpRequests(authorizeHttpRequests ->
-                        authorizeHttpRequests
-                                .requestMatchers("/**").permitAll()
-                )
-                .oauth2Login(oauth2Login ->
-                        oauth2Login
-                                .successHandler(this::onGoogleAuthSuccess)
-                                .loginPage("/oauth2/authorization/google")
-                )
-                .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+        return httpSecurity.authorizeHttpRequests(
+                        authorizeHttpRequests -> authorizeHttpRequests.requestMatchers("/**")
+                                .permitAll()).oauth2Login(
+                        oauth2Login -> oauth2Login.successHandler(this::onGoogleAuthSuccess)
+                                .loginPage("/oauth2/authorization/google")).sessionManagement(
+                        sessionManagement -> sessionManagement.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS))
                 // Disable standard csrf token, because we use JWT
                 .csrf(AbstractHttpConfigurer::disable)
                 // No default login and logout pages
                 .formLogin(AbstractHttpConfigurer::disable)
-                .logout(AbstractHttpConfigurer::disable)
-                .build();
+                .logout(AbstractHttpConfigurer::disable).build();
     }
 
 
@@ -106,13 +101,12 @@ public class SecurityConfig {
 
         // clear expired and most likely dangling tokens
         userService.filterUserRefreshTokens(
-                token -> !jwtService.parseToken(token).isExpired(),
-                userInfo.getUserId()
-        );
+                token -> !jwtService.parseToken(token).isExpired(), userInfo.getUserId());
 
         // Clear the session created by oauth2
         var session = request.getSession(false);
-        if (session != null) session.invalidate();
+        if (session != null)
+            session.invalidate();
         Cookie jsessionCookie = new Cookie("JSESSIONID", "");
         jsessionCookie.setMaxAge(0);
         jsessionCookie.setPath("/");

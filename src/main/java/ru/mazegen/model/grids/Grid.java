@@ -1,5 +1,6 @@
 package ru.mazegen.model.grids;
 
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 @Data
 @NoArgsConstructor
@@ -24,7 +26,8 @@ public class Grid {
 
 
     public Grid(int sizeX, int sizeY, boolean filledGrid) {
-        if (sizeX <= 0 || sizeY <= 0) throw new RuntimeException("Negative grid size");
+        if (sizeX <= 0 || sizeY <= 0)
+            throw new RuntimeException("Negative grid size");
         this.edges = new byte[sizeY * 2 + 1][];
         // init edges matrix
         for (int i = 0; i < this.edges.length; i++) {
@@ -35,7 +38,8 @@ public class Grid {
 
 
     public Grid(byte[][] edges) throws GridFormatException {
-        if (edges == null) throw new GridFormatException("Grid can't be null");
+        if (edges == null)
+            throw new GridFormatException("Grid can't be null");
         validateGridStructure(edges);
         this.edges = edges;
     }
@@ -43,13 +47,15 @@ public class Grid {
 
     private void validateGridStructure(byte[][] edges) throws GridFormatException {
         if (edges.length < 3 || edges.length % 2 == 0) {
-            throw new GridFormatException("Invalid grid structure: edges matrix must have odd number of rows >= 3, but actual is " + edges.length);
+            throw new GridFormatException(
+                    "Invalid grid structure: edges matrix must have odd number of rows >= 3, but actual is " + edges.length);
         }
 
         // Check nulls
         for (int i = 1; i < edges.length; i++) {
             if (edges[i] == null) {
-                throw new GridFormatException("Grid row can't be null: row " + i + " is null");
+                throw new GridFormatException(
+                        "Grid row can't be null: row " + i + " is null");
             }
         }
 
@@ -57,12 +63,14 @@ public class Grid {
         int expectedRowLength = edges[0].length;
         for (int i = 1; i < edges.length; i++) {
             if (edges[i].length != expectedRowLength) {
-                throw new GridFormatException("Inconsistent row lengths: row 0 has " + expectedRowLength + " elements, but row " + i + " has " + edges[i].length + " elements");
+                throw new GridFormatException(
+                        "Inconsistent row lengths: row 0 has " + expectedRowLength + " elements, but row " + i + " has " + edges[i].length + " elements");
             }
         }
 
         if (expectedRowLength < 2) {
-            throw new GridFormatException("Invalid grid structure: matrix must have number of columns >= 2, but actual is " + expectedRowLength);
+            throw new GridFormatException(
+                    "Invalid grid structure: matrix must have number of columns >= 2, but actual is " + expectedRowLength);
         }
     }
 
@@ -71,13 +79,16 @@ public class Grid {
         return edges.length > 0 ? edges[0].length - 1 : 0;
     }
 
+
     public final int getSizeY() {
         return (edges.length - 1) / 2;
     }
 
+
     public final int maxCellX() {
         return getSizeX() - 1;
     }
+
 
     public final int maxCellY() {
         return getSizeY() - 1;
@@ -146,9 +157,9 @@ public class Grid {
      */
     public List<Edge> getCellActiveEdges(int cellX, int cellY) {
         return Arrays.stream(Edge.values())
-                .filter(edge -> getCellEdge(cellX, cellY, edge))
-                .toList();
+                .filter(edge -> getCellEdge(cellX, cellY, edge)).toList();
     }
+
 
     /**
      * Is a certain edge of a certain cell active

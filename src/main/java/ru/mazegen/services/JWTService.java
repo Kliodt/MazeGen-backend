@@ -1,5 +1,6 @@
 package ru.mazegen.services;
 
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -17,10 +18,12 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+
 @Service
 public class JWTService {
 
-    public record JWTParseResult(boolean isValid, boolean isExpired, JWTUserInfo jwtUserInfo) {
+    public record JWTParseResult(boolean isValid, boolean isExpired,
+                                 JWTUserInfo jwtUserInfo) {
     }
 
     @Value("${spring.security.jwt.secret_key}")
@@ -37,23 +40,20 @@ public class JWTService {
         return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
+
     @Nullable
     private String createToken(@NotNull JWTUserInfo user, boolean isRefresh) {
         long lifetimeMs = isRefresh ? refreshTokenLifetimeMs : accessTokenLifetimeMs;
-        return Jwts.builder()
-                .setClaims(user.getClaims())
+        return Jwts.builder().setClaims(user.getClaims())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + lifetimeMs))
-                .signWith(getSecretKey())
-                .compact();
+                .signWith(getSecretKey()).compact();
     }
 
 
     @NotNull
     public JWTParseResult parseToken(@NotNull String token) {
-        JwtParser parser = Jwts.parserBuilder()
-                .setSigningKey(getSecretKey())
-                .build();
+        JwtParser parser = Jwts.parserBuilder().setSigningKey(getSecretKey()).build();
         try {
             var claims = parser.parseClaimsJws(token).getBody();
             return new JWTParseResult(true, false, JWTUserInfo.fromClaims(claims));
@@ -66,7 +66,9 @@ public class JWTService {
     }
 
 
-    private void setTokenCookie(HttpServletResponse response, String token, boolean isRefresh) {
+    private void setTokenCookie(
+            HttpServletResponse response, String token, boolean isRefresh
+    ) {
         Cookie cookie = new Cookie(isRefresh ? "refresh_token" : "access_token", token);
         cookie.setHttpOnly(true);
         //        cookie.setSecure(true); todo: after migrating from http to https
@@ -78,7 +80,8 @@ public class JWTService {
 
     private String getTokenCookie(HttpServletRequest request, boolean isRefresh) {
         var cookies = request.getCookies();
-        if (cookies == null) return null;
+        if (cookies == null)
+            return null;
         var name = isRefresh ? "refresh_token" : "access_token";
         for (var c : cookies) {
             if (name.equals(c.getName())) {
@@ -92,7 +95,8 @@ public class JWTService {
     private String getTokenFromAuthHeader(HttpServletRequest request) {
         var prefix = "Bearer ";
         var str = request.getHeader("Authorization");
-        if (str == null || !str.startsWith(prefix)) return null;
+        if (str == null || !str.startsWith(prefix))
+            return null;
         return str.substring(prefix.length());
     }
 
@@ -101,21 +105,26 @@ public class JWTService {
         setTokenCookie(response, token, false);
     }
 
+
     public void setRefreshToken(HttpServletResponse response, @NotNull String token) {
         setTokenCookie(response, token, true);
     }
+
 
     public String getAccessToken(HttpServletRequest request) {
         return getTokenFromAuthHeader(request);
     }
 
+
     public String getRefreshToken(HttpServletRequest request) {
         return getTokenCookie(request, true);
     }
 
+
     public String createAccessToken(JWTUserInfo userInfo) {
         return createToken(userInfo, false);
     }
+
 
     public String createRefreshToken(JWTUserInfo userInfo) {
         return createToken(userInfo, true);

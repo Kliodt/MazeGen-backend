@@ -1,5 +1,6 @@
 package ru.mazegen.controllers.graphql;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -12,12 +13,14 @@ import ru.mazegen.model.User;
 import ru.mazegen.security.JWTUserInfo;
 import ru.mazegen.services.UserService;
 
+
 @Controller
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
 
     private final UserService userService;
+
 
     @QueryMapping
     public User getUserById(@Argument @NotNull Long userId) {
@@ -27,9 +30,11 @@ public class UserController {
 
     // --------------------- resolve private fields ---------------------
 
+
     @SchemaMapping(typeName = "User", field = "role")
     public String resolveRole(User user, @AuthenticationPrincipal JWTUserInfo userInfo) {
-        if (user.getId() != userInfo.getUserId()) return null;
+        if (user.getId() != userInfo.getUserId())
+            return null;
         return user.getRole().toString();
     }
 }

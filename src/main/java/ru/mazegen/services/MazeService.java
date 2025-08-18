@@ -1,5 +1,6 @@
 package ru.mazegen.services;
 
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -9,8 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.mazegen.model.Maze;
 import ru.mazegen.model.User;
-import ru.mazegen.repository.PathRepository;
 import ru.mazegen.repository.MazeRepository;
+import ru.mazegen.repository.PathRepository;
 import ru.mazegen.repository.UserRepository;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class MazeService {
     private final UserRepository userRepository;
     private final PathRepository mazePathRepository;
 
+
     /**
      * Find maze by id, return null if not exists
      */
@@ -31,6 +33,7 @@ public class MazeService {
     public Maze getMazeById(long id) {
         return mazeRepository.findById(id).orElse(null);
     }
+
 
     /**
      * Save to database
@@ -44,14 +47,18 @@ public class MazeService {
         mazeRepository.save(maze);
     }
 
+
     /**
      * Get recent mazes by user. pivotId, pageNum, pageSize are used for pagination
      */
     @Transactional
-    public List<Maze> getMazesByAuthor(long authorId, long pivotId, int pageNum, int pageSize) {
+    public List<Maze> getMazesByAuthor(
+            long authorId, long pivotId, int pageNum, int pageSize
+    ) {
         var sort = Sort.by(Sort.Direction.DESC, "id");
         var page = PageRequest.of(pageNum, pageSize, sort);
-        return mazeRepository.findMazesByAuthorIdAndIdLessThan(authorId, pivotId + 1, page);
+        return mazeRepository.findMazesByAuthorIdAndIdLessThan(authorId, pivotId + 1,
+                page);
     }
 
 

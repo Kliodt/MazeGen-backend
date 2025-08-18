@@ -1,5 +1,6 @@
 package ru.mazegen.controllers.graphql;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,7 @@ import ru.mazegen.security.JWTUserInfo;
 import ru.mazegen.services.PathService;
 
 import java.util.List;
+
 
 @Controller
 @RequiredArgsConstructor
@@ -31,7 +33,8 @@ public class PathController {
             log.warn("Path save from unauthenticated user");
             return false;
         }
-        return null != pathService.updatePathPointsForUserAndMaze(points, userInfo.getUserId(), mazeId, false);
+        return null != pathService.updatePathPointsForUserAndMaze(points,
+                userInfo.getUserId(), mazeId, false);
     }
 
 
@@ -46,7 +49,8 @@ public class PathController {
             log.warn("Maze completion from unauthenticated user");
             return null;
         }
-        return pathService.updatePathPointsForUserAndMaze(points, userInfo.getUserId(), mazeId, true);
+        return pathService.updatePathPointsForUserAndMaze(points, userInfo.getUserId(),
+                mazeId, true);
     }
 
 }

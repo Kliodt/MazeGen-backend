@@ -1,20 +1,23 @@
 package ru.mazegen.model;
 
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.mazegen.model.mazeGenAlgorithms.EmptyMazeGenAlgorithm;
 import ru.mazegen.model.mazeGenAlgorithms.MazeGenAlgorithm;
 import ru.mazegen.model.mazeGenAlgorithms.RandomMazeGenAlgorithm;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Map;
+
 
 /**
  * Parameters for the maze generators.
  * Depending on the maze generator parameter may be used or ignored.
  * Required parameters are in the constructor.
+ *
  * @see MazeGenAlgorithm
  */
 @Data
@@ -30,10 +33,8 @@ public final class MazeGenerator {
     private int finishY;
 
 
-    private static final Map<String, MazeGenAlgorithm> generators = Map.of(
-            "empty", new EmptyMazeGenAlgorithm(),
-            "random", new RandomMazeGenAlgorithm()
-    );
+    private static final Map<String, MazeGenAlgorithm> generators = Map.of("empty",
+            new EmptyMazeGenAlgorithm(), "random", new RandomMazeGenAlgorithm());
 
 
     // utility method
@@ -84,11 +85,8 @@ public final class MazeGenerator {
 
         long endTime = System.currentTimeMillis();
 
-        maze.setMetaInformation(
-                generator.getFullAlgorithmName(),
-                OffsetDateTime.now(),
-                (int) (endTime - startTime)
-        );
+        maze.setMetaInformation(generator.getFullAlgorithmName(), OffsetDateTime.now(),
+                (int) (endTime - startTime));
 
         return maze;
     }

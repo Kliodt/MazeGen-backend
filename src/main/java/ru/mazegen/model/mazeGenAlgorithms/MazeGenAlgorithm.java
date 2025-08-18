@@ -1,8 +1,10 @@
 package ru.mazegen.model.mazeGenAlgorithms;
 
+
 import org.jetbrains.annotations.NotNull;
 import ru.mazegen.model.Maze;
 import ru.mazegen.model.MazeGenerator;
+
 
 public interface MazeGenAlgorithm {
 

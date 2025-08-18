@@ -1,5 +1,6 @@
 package ru.mazegen.controllers.rest;
 
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ import ru.mazegen.services.UserService;
 
 import java.util.Map;
 
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/auth")
@@ -23,12 +25,15 @@ public class AuthController {
     private JWTService jwtService;
     private UserService userService;
 
+
     /**
      * Update access and refresh tokens using refresh token
      * (usually first request when user enters the website, also when access token expires)
      */
     @PostMapping("/token")
-    public Map<String, String> updateTokens(HttpServletRequest request, HttpServletResponse response) {
+    public Map<String, String> updateTokens(
+            HttpServletRequest request, HttpServletResponse response
+    ) {
 
         var oldRefreshToken = jwtService.getRefreshToken(request);
 
@@ -52,7 +57,8 @@ public class AuthController {
         var newRefreshToken = jwtService.createRefreshToken(userInfo);
 
         // check that this token wasn't used before
-        if (!userService.replaceRefreshTokenForUser(oldRefreshToken, newRefreshToken, userInfo.getUserId())) {
+        if (!userService.replaceRefreshTokenForUser(oldRefreshToken, newRefreshToken,
+                userInfo.getUserId())) {
             log.info("token reused: {}", oldRefreshToken);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
@@ -72,7 +78,11 @@ public class AuthController {
      * Invalidate current refresh token. (Access token still could be used until it expires)
      */
     @PostMapping("/logout")
-    public void logoutUser(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal JWTUserInfo userInfo) {
+    public void logoutUser(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @AuthenticationPrincipal JWTUserInfo userInfo
+    ) {
         if (userInfo == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -80,7 +90,8 @@ public class AuthController {
 
         var oldRefreshToken = jwtService.getRefreshToken(request);
 
-        if (oldRefreshToken != null && userService.removeRefreshTokenForUser(oldRefreshToken, userInfo.getUserId())) {
+        if (oldRefreshToken != null && userService.removeRefreshTokenForUser(
+                oldRefreshToken, userInfo.getUserId())) {
             return;
         }
 

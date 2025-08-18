@@ -1,5 +1,6 @@
 package ru.mazegen.security;
 
+
 import io.jsonwebtoken.Claims;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -8,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import ru.mazegen.model.User;
 
-import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * Class that represents information about user stored in JWT
@@ -28,13 +29,12 @@ public class JWTUserInfo {
         return new JWTUserInfo(user.getId(), user.getRole(), user.getNickname());
     }
 
+
     public Map<String, String> getClaims() {
-        return Map.of(
-                "user_id", Long.toString(userId),
-                "role", role.toString(),
-                "nickname", nickname
-        );
+        return Map.of("user_id", Long.toString(userId), "role", role.toString(),
+                "nickname", nickname);
     }
+
 
     public static JWTUserInfo fromClaims(@NonNull Claims claims) {
         try {
