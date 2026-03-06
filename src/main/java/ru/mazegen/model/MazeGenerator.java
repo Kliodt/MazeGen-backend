@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.mazegen.model.mazeGenAlgorithms.EmptyMazeGenAlgorithm;
-import ru.mazegen.model.mazeGenAlgorithms.MazeGenAlgorithm;
-import ru.mazegen.model.mazeGenAlgorithms.RandomMazeGenAlgorithm;
+import ru.mazegen.model.mazeGenAlgorithms.*;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -33,8 +31,12 @@ public final class MazeGenerator {
     private int finishY;
 
 
-    private static final Map<String, MazeGenAlgorithm> generators = Map.of("empty",
-            new EmptyMazeGenAlgorithm(), "random", new RandomMazeGenAlgorithm());
+    private static final Map<String, MazeGenAlgorithm> generators = Map.of(
+            "empty", new EmptyMazeGenAlgorithm(),
+            "random", new RandomMazeGenAlgorithm(),
+            "sidewinder", new SidewinderGenAlgorithm(),
+            "eller", new EllerGenAlgorithm()
+    );
 
 
     // utility method
@@ -90,5 +92,12 @@ public final class MazeGenerator {
 
         return maze;
     }
+
+
+//    public static void main(String[] args) {
+//        var mg = new MazeGenerator(10, 10, "Eller", 0, 0, 9, 9);
+//        var maze = mg.generate();
+//        maze.printDebug();
+//    }
 
 }

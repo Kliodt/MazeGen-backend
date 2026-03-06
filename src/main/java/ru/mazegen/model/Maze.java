@@ -115,6 +115,35 @@ public class Maze {
     }
 
 
+    void printDebug() {
+        var sb = new StringBuilder();
+        for (int y = 0; ; y++) {
+            for (int x = 0; x < grid.getSizeX() + 1; x++) {
+                if (grid.isCellEdgeActive(x, y, Grid.Edge.TOP)) {
+                    sb.append("----");
+                } else {
+                    sb.append("    ");
+                }
+            }
+            sb.append('\n');
+
+            if (y == grid.getSizeY())
+                break;
+
+            for (int x = 0; x < grid.getSizeX() + 1; x++) {
+                if (grid.isCellEdgeActive(x, y, Grid.Edge.LEFT)) {
+                    sb.append("|   ");
+                } else {
+                    sb.append("    ");
+                }
+            }
+            sb.append('\n');
+        }
+        System.out.println("Maze " + algorithm);
+        System.out.println(sb);
+    }
+
+
     @Converter
     private static class GridToStringConverter
             implements AttributeConverter<Grid, String> {

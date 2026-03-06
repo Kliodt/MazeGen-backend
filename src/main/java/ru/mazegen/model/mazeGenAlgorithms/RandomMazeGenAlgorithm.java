@@ -16,6 +16,8 @@ import java.util.Random;
  * for testing purposes (and fuzzy testing in the future)
  */
 public class RandomMazeGenAlgorithm implements MazeGenAlgorithm {
+
+
     private static final Random random = new Random();
 
 

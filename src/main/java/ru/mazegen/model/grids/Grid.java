@@ -180,6 +180,8 @@ public class Grid {
         for (int y = 0; y < getSizeY(); y++) {
             setCellEdge(0, y, Edge.LEFT, true);
             setCellEdge(getSizeX() - 1, y, Edge.RIGHT, true);
+            setCellEdge(getSizeX(), y, Edge.BOTTOM, false);
         }
+        setCellEdge(getSizeX(), 0, Edge.TOP, false);
     }
 }

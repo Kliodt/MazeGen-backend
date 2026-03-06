@@ -23,7 +23,6 @@ public class MazeService {
 
     private final MazeRepository mazeRepository;
     private final UserRepository userRepository;
-    private final PathRepository mazePathRepository;
 
 
     /**
